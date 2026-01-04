@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_tech_ct/features/client/profile/views/profile_screen.dart';
 import 'features/auth/views/login_screen.dart';
 
 void main() {
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: LoginScreen(),
+      home: ProfileScreen(),
     );
   }
 }
