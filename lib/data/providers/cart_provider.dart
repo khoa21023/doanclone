@@ -3,7 +3,6 @@ import '../models/product_model.dart';
 
 class CartProvider with ChangeNotifier {
   final List<CartItem> _items = [];
-
   List<CartItem> get items => _items;
 
   double get totalAmount {
@@ -14,12 +13,26 @@ class CartProvider with ChangeNotifier {
     return total;
   }
 
-  void addItem(Product product) {
-    final index = _items.indexWhere((item) => item.product.id == product.id);
-    if (index >= 0) {
-      _items[index].quantity += 1;
+  // Cập nhật hàm addItem để nhận cả thông tin Custom
+  void addItem(Product product, {int quantity = 1, bool isCustom = false, Uint8List? img, String? text, String? sticker}) {
+    // Nếu là hàng thiết kế riêng -> Luôn thêm mới, không cộng dồn số lượng
+    if (isCustom) {
+      _items.add(CartItem(
+        product: product,
+        quantity: quantity,
+        isCustomDesign: true,
+        customImage: img,
+        customText: text,
+        sticker: sticker,
+      ));
     } else {
-      _items.add(CartItem(product: product));
+      // Hàng thường -> Cộng dồn nếu trùng ID
+      final index = _items.indexWhere((item) => item.product.id == product.id && !item.isCustomDesign);
+      if (index >= 0) {
+        _items[index].quantity += quantity;
+      } else {
+        _items.add(CartItem(product: product, quantity: quantity));
+      }
     }
     notifyListeners();
   }
