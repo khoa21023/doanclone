@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/cart_provider.dart';
+import '../../../data/providers/cart_provider.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -10,13 +10,13 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
-    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'VND');
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'VND', decimalDigits: 0);
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text('Giỏ hàng (${cart.items.length})'),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF2563EB),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -39,7 +39,7 @@ class CartScreen extends StatelessWidget {
                       Navigator.pop(context); 
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: const Color(0xFF2563EB),
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
@@ -75,21 +75,32 @@ class CartScreen extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // --- HIỂN THỊ ẢNH SẢN PHẨM ---
                                 Container(
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[100], 
                                     borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey.shade300)
                                   ),
-                                  child: item.product.imageUrl.isNotEmpty
-                                      ? Image.network(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: item.isCustomDesign && item.customImage != null
+                                      // 1. Nếu là hàng custom -> Hiện ảnh từ Memory (ảnh chụp màn hình thiết kế)
+                                      ? Image.memory(
+                                          item.customImage!,
+                                          fit: BoxFit.contain,
+                                        )
+                                      // 2. Nếu là hàng thường -> Hiện ảnh từ Network
+                                      : Image.network(
                                           item.product.imageUrl, 
                                           fit: BoxFit.cover,
                                           errorBuilder: (c, e, s) => const Icon(Icons.broken_image, color: Colors.grey),
-                                        )
-                                      : const Icon(Icons.image, color: Colors.grey),
+                                        ),
+                                  ),
                                 ),
+                                // -----------------------------
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
@@ -102,14 +113,22 @@ class CartScreen extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        item.product.type == 'phone' ? 'Điện thoại' : 'Phụ kiện',
-                                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                                      ),
+                                      // Hiển thị chi tiết (nếu là custom)
+                                      if (item.isCustomDesign)
+                                        Text(
+                                          "Thiết kế riêng ${item.customText != null ? '+ Chữ' : ''} ${item.sticker != null ? '+ Sticker' : ''}",
+                                          style: TextStyle(color: Colors.deepOrange, fontSize: 12, fontWeight: FontWeight.bold),
+                                        )
+                                      else
+                                        Text(
+                                          item.product.type == 'phone' ? 'Điện thoại' : 'Phụ kiện',
+                                          style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                                        ),
+                                      
                                       const SizedBox(height: 8),
                                       Text(
                                         currencyFormat.format(item.product.price),
-                                        style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 16),
+                                        style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 16),
                                       ),
                                     ],
                                   ),
@@ -193,7 +212,7 @@ class CartScreen extends StatelessWidget {
                           const Text('Thành tiền', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           Text(
                             currencyFormat.format(cart.totalAmount + 30000),
-                            style: const TextStyle(fontSize: 20, color: Colors.blue, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 20, color: Color(0xFF2563EB), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -209,7 +228,7 @@ class CartScreen extends StatelessWidget {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: const Color(0xFF2563EB),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             elevation: 0,
                           ),
