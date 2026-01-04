@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/profile_viewmodel.dart';
-import '../models/user_profile.dart';
+import '../view_models/profile_view_model.dart';
+import '../../../../data/models/user_profile.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -138,13 +138,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       if (_profileFormKey.currentState!
                                           .validate()) {
                                         vm.saveProfile(
-                                          UserProfile(
-                                            name: _nameController.text,
-                                            email: _emailController.text,
-                                            phone: _phoneController.text,
-                                            address:
-                                                _addressController.text,
-                                          ),
+                                          name: _nameController.text,
+                                          email: _emailController.text,
+                                          phone: _phoneController.text,
+                                          address:_addressController.text,
                                         );
                                       }
                                     },
@@ -154,7 +151,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       children: [
                                         Icon(Icons.save_outlined),
                                         SizedBox(width: 6),
-                                        Text("Lưu thay đổi")
+                                        Flexible(
+                                          child: Text("Lưu thay đổi",overflow: TextOverflow.ellipsis)
+                                          )
                                       ],
                                     ),
                                   )
@@ -241,7 +240,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           children: [
                                             Icon(Icons.lock_outline),
                                             SizedBox(width: 6),
-                                            Text("Cập nhật mật khẩu")
+                                            Flexible(
+                                              child: Text("Cập nhật",overflow: TextOverflow.ellipsis)
+                                            )
                                           ],
                                         )
                                       ),
@@ -310,14 +311,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(icon, size: 16, color: Colors.grey),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.grey,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
+          )
         ],
       ),
       const SizedBox(height: 6),
