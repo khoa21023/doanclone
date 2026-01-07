@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_tech_ct/features/client/cart/checkout_screen.dart';
+import 'package:mobile_tech_ct/features/client/cart/views/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../cart/checkout_screen.dart'; // Import màn hình thanh toán
+import '../../cart/views/checkout_screen.dart'; // Import màn hình thanh toán
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
