@@ -168,7 +168,7 @@ class LoginScreen extends StatelessWidget {
 
                                         // Logic điều hướng
                                         if (_emailController.text ==
-                                            'admin@phoneparts.com') {
+                                            'admin@gmail.com') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
@@ -239,44 +239,6 @@ class LoginScreen extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
-
-                          // Demo Account Info
-                          const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tài khoản Demo:',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Admin: admin@phoneparts.com / admin123',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                Text(
-                                  'User: user@example.com / user123',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ],
                       );

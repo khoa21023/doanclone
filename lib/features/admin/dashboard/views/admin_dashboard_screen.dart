@@ -4,6 +4,7 @@ import '../view_models/admin_dashboard_view_model.dart';
 import '../../promotions/views/promotions_screen.dart';
 import '../../order/views/admin_order_detail_screen.dart';
 import '../../../../data/models/order.dart';
+import '../../../auth/views/login_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -68,10 +69,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              onPressed: () =>
-                  Navigator.of(context).popUntil((route) => route.isFirst),
+              icon: const Icon(Icons.logout),
+              color: Colors.white,
+              tooltip: "Đăng xuất",
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Đăng xuất"),
+                      content: const Text(
+                        "Bạn có chắc chắn muốn đăng xuất quyền Admin?",
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("Hủy"),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        TextButton(
+                          child: const Text(
+                            "Đồng ý",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () {
+                            // 1. Đóng dialog
+                            Navigator.of(context).pop();
+
+                            // 2. Xóa hết stack và về Login
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
+            const SizedBox(width: 8),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48),

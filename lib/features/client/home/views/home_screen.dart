@@ -6,11 +6,14 @@ import '../../../../data/models/product_model.dart';
 import '../../../../data/services/mock_data.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
-import '../../cart/cart_screen.dart'; 
+import '../../cart/cart_screen.dart';
 
 import 'product_detail_screen.dart';
 import 'wishlist_screen.dart';
 import 'custom_design_screen.dart';
+import '../../profile/views/profile_screen.dart';
+import '../../order/views/order_history_screen.dart';
+import '../../../auth/views/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,42 +27,57 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = "Tất cả";
   String _currentSortOption = "Tên";
   String _searchQuery = "";
-  String? _selectedCaseBrand; 
+  String? _selectedCaseBrand;
 
   final List<String> _categories = [
-    "Tất cả", "Màn hình", "Pin", "Camera", "Cổng sạc", 
-    "Loa", "Ốp lưng", "Motor", "Nút", "Phụ kiện"
+    "Tất cả",
+    "Màn hình",
+    "Pin",
+    "Camera",
+    "Cổng sạc",
+    "Loa",
+    "Ốp lưng",
+    "Motor",
+    "Nút",
+    "Phụ kiện",
   ];
 
   final List<Product> _allProducts = MockData.products;
 
   void _onCategorySelected(String category) {
-    setState(() { 
-      _selectedCategory = category; 
-      _selectedCaseBrand = null; 
+    setState(() {
+      _selectedCategory = category;
+      _selectedCaseBrand = null;
     });
   }
 
   void _onCaseBrandSelected(String brand) {
     setState(() {
-      if (_selectedCaseBrand == brand) { 
-        _selectedCaseBrand = null; 
-      } else { 
-        _selectedCaseBrand = brand; 
+      if (_selectedCaseBrand == brand) {
+        _selectedCaseBrand = null;
+      } else {
+        _selectedCaseBrand = brand;
       }
     });
   }
 
   void _navigateToCart() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const CartScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CartScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final wishlistProvider = Provider.of<WishlistProvider>(context);
-    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
-    
+    final currencyFormat = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+      decimalDigits: 0,
+    );
+
     double screenWidth = MediaQuery.of(context).size.width;
     // Điều chỉnh số cột linh hoạt để tránh tràn layout grid
     int crossAxisCount = screenWidth > 800 ? 4 : 2;
@@ -75,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_selectedCategory == "Ốp lưng" && _selectedCaseBrand != null) {
         matchesCategory = matchesCategory && (p.brand == _selectedCaseBrand);
       }
-      final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch = p.name.toLowerCase().contains(
+        _searchQuery.toLowerCase(),
+      );
       return matchesCategory && matchesSearch;
     }).toList();
 
@@ -93,8 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF0066FF),
         elevation: 0,
         // Tăng chiều cao AppBar lên 140 để chứa đủ 2 dòng (Logo/Icon và Search) thoải mái
-        toolbarHeight: 140, 
-        titleSpacing: 0, 
+        toolbarHeight: 140,
+        titleSpacing: 0,
         automaticallyImplyLeading: false,
 
         // --- BỐ CỤC CHÍNH APPBAR ---
@@ -116,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       alignment: Alignment.centerLeft,
                       child: Image.asset(
-                        'assets/images/app_logo.jpg', 
+                        'assets/images/app_logo.jpg',
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -137,43 +157,157 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           if (wishlistProvider.items.isNotEmpty)
                             Positioned(
-                              right: 6, top: 6, 
+                              right: 6,
+                              top: 6,
                               child: Container(
-                                padding: const EdgeInsets.all(4), 
-                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), 
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16), 
-                                child: Text('${wishlistProvider.items.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center)
-                              )
-                            )
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  '${wishlistProvider.items.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                      
+
                       // Nút Giỏ hàng
                       Stack(
                         alignment: Alignment.center,
                         children: [
                           IconButton(
-                            onPressed: _navigateToCart, 
-                            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 26)
+                            onPressed: _navigateToCart,
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                           ),
                           if (cartProvider.items.isNotEmpty)
                             Positioned(
-                              right: 6, top: 6, 
+                              right: 6,
+                              top: 6,
                               child: Container(
-                                padding: const EdgeInsets.all(4), 
-                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), 
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16), 
-                                child: Text('${cartProvider.items.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center)
-                              )
-                            )
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  '${cartProvider.items.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                      
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.history, color: Colors.white, size: 26), tooltip: 'Lịch sử'), 
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.person_outline, color: Colors.white, size: 26)),
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.logout, color: Colors.white, size: 26)),
+
+                      // Nút Lịch sử
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OrderHistoryScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.history,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                        tooltip: 'Lịch sử',
+                      ),
+
+                      // Nút Profile (Hồ sơ)
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfileScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+
+                      // Nút Logout (Đăng xuất)
+                      IconButton(
+                        onPressed: () {
+                          // Hiển thị hộp thoại xác nhận đăng xuất
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Đăng xuất"),
+                                content: const Text(
+                                  "Bạn có chắc chắn muốn đăng xuất không?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("Hủy"),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                  ),
+                                  TextButton(
+                                    child: const Text(
+                                      "Đồng ý",
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () {
+                                      // Đóng dialog
+                                      Navigator.of(context).pop();
+
+                                      // Quay về màn hình Login và xóa hết các màn hình trước đó khỏi stack
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => LoginScreen(),
+                                        ),
+                                        (route) => false,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
                     ],
-                  )
+                  ),
                 ],
               ),
 
@@ -183,11 +317,15 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 height: 44, 
                 decoration: BoxDecoration(
-                  color: Colors.white, 
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-                  ]
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -196,13 +334,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
-                        controller: _searchController, 
-                        onChanged: (value) => setState(() => _searchQuery = value), 
+                        controller: _searchController,
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
                         style: const TextStyle(fontSize: 15),
                         textAlignVertical: TextAlignVertical.center, 
                         decoration: const InputDecoration(
-                          hintText: 'Bạn tìm gì hôm nay?', 
-                          hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                          hintText: 'Bạn tìm gì hôm nay?',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero 
@@ -213,8 +355,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       margin: const EdgeInsets.only(right: 4),
                       child: IconButton(
-                        icon: const Icon(Icons.tune, size: 20, color: Color(0xFF0066FF)), 
-                        onPressed: () => setState(() => _isFilterVisible = !_isFilterVisible)
+                        icon: const Icon(
+                          Icons.tune,
+                          size: 20,
+                          color: Color(0xFF0066FF),
+                        ),
+                        onPressed: () => setState(
+                          () => _isFilterVisible = !_isFilterVisible,
+                        ),
                       ),
                     ),
                   ],
@@ -224,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,95 +381,157 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_isFilterVisible)
               Container(
                 color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), 
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
-                    const Text("Sắp xếp: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Sắp xếp: ",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: DropdownButton<String>(
-                        isExpanded: true, 
-                        value: _currentSortOption, 
-                        underline: Container(height: 1, color: Colors.grey.shade300),
-                        items: ['Tên', 'Giá: Thấp đến Cao', 'Giá: Cao đến Thấp'].map((String value) => DropdownMenuItem(value: value, child: Text(value))).toList(), 
-                        onChanged: (val) => setState(() => _currentSortOption = val!)
+                        isExpanded: true,
+                        value: _currentSortOption,
+                        underline: Container(
+                          height: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                        items: ['Tên', 'Giá: Thấp đến Cao', 'Giá: Cao đến Thấp']
+                            .map(
+                              (String value) => DropdownMenuItem(
+                                value: value,
+                                child: Text(value),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) =>
+                            setState(() => _currentSortOption = val!),
                       ),
                     ),
                   ],
-                )
+                ),
               ),
-            
+
             const SizedBox(height: 16),
-            
+
             // --- LIST DANH MỤC ---
             SingleChildScrollView(
-              scrollDirection: Axis.horizontal, 
-              padding: const EdgeInsets.symmetric(horizontal: 16), 
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: _categories.map((c) => _buildCategoryChip(c, isSelected: c == _selectedCategory)).toList()
-              )
+                children: _categories
+                    .map(
+                      (c) => _buildCategoryChip(
+                        c,
+                        isSelected: c == _selectedCategory,
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-            
+
             // --- SUB-CATEGORY ỐP LƯNG & NÚT TỰ THIẾT KẾ ---
             if (_selectedCategory == "Ốp lưng") ...[
               const SizedBox(height: 12),
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal, 
-                padding: const EdgeInsets.symmetric(horizontal: 16), 
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    _buildSubCategoryChip("iPhone", isSelected: _selectedCaseBrand == "iPhone"), 
-                    _buildSubCategoryChip("Samsung", isSelected: _selectedCaseBrand == "Samsung"), 
-                    _buildSubCategoryChip("Xiaomi", isSelected: _selectedCaseBrand == "Xiaomi"), 
-                    
+                    _buildSubCategoryChip(
+                      "iPhone",
+                      isSelected: _selectedCaseBrand == "iPhone",
+                    ),
+                    _buildSubCategoryChip(
+                      "Samsung",
+                      isSelected: _selectedCaseBrand == "Samsung",
+                    ),
+                    _buildSubCategoryChip(
+                      "Xiaomi",
+                      isSelected: _selectedCaseBrand == "Xiaomi",
+                    ),
+
                     Container(
-                      margin: const EdgeInsets.only(left: 8), 
+                      margin: const EdgeInsets.only(left: 8),
                       child: ElevatedButton.icon(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CustomDesignScreen())).then((_) => setState((){})), 
-                        icon: const Icon(Icons.brush, size: 16), 
-                        label: const Text("Tự thiết kế", style: TextStyle(fontWeight: FontWeight.bold)), 
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CustomDesignScreen(),
+                          ),
+                        ).then((_) => setState(() {})),
+                        icon: const Icon(Icons.brush, size: 16),
+                        label: const Text(
+                          "Tự thiết kế",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepOrange, 
-                          foregroundColor: Colors.white, 
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), 
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-                        )
-                      )
-                    )
-                  ]
-                )
+                          backgroundColor: Colors.deepOrange,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-            
+
             const SizedBox(height: 16),
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text("Tìm thấy ${displayedProducts.length} sản phẩm", style: const TextStyle(color: Colors.grey))),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "Tìm thấy ${displayedProducts.length} sản phẩm",
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
             const SizedBox(height: 12),
-            
+
             // --- GRID SẢN PHẨM ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16), 
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.builder(
-                shrinkWrap: true, 
-                physics: const NeverScrollableScrollPhysics(), 
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount, 
-                  childAspectRatio: 0.70, 
-                  crossAxisSpacing: 16, 
-                  mainAxisSpacing: 16
-                ), 
-                itemCount: displayedProducts.length, 
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: 0.70,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: displayedProducts.length,
                 itemBuilder: (context, index) {
                   final product = displayedProducts[index];
                   final double oldPrice = product.price * 1.15;
 
                   return GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ),
+                    ),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
-                        border: Border.all(color: Colors.grey.shade200)
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey.shade200),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,22 +540,46 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Stack(
                               children: [
                                 ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(8),
+                                  ),
                                   child: Image.network(
-                                    product.imageUrl, 
-                                    width: double.infinity, 
+                                    product.imageUrl,
+                                    width: double.infinity,
                                     fit: BoxFit.contain,
-                                    errorBuilder: (c,e,s) => Container(color: Colors.grey[100], child: const Center(child: Icon(Icons.image, color: Colors.grey))),
+                                    errorBuilder: (c, e, s) => Container(
+                                      color: Colors.grey[100],
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.image,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 
                                 // Tag giảm giá
                                 Positioned(
-                                  top: 8, left: 8,
+                                  top: 8,
+                                  left: 8,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
-                                    child: const Text("-15%", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      "-15%",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 
@@ -411,13 +645,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 )
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
                   );
-                }
-              )
+                },
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -428,33 +662,48 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryChip(String label, {bool isSelected = false}) {
     return GestureDetector(
-      onTap: () => _onCategorySelected(label), 
+      onTap: () => _onCategorySelected(label),
       child: Container(
-        margin: const EdgeInsets.only(right: 8), 
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), 
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0066FF) : Colors.white, 
-          borderRadius: BorderRadius.circular(20), 
-          border: isSelected ? null : Border.all(color: Colors.grey.shade300)
-        ), 
-        child: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w500))
-      )
+          color: isSelected ? const Color(0xFF0066FF) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected ? null : Border.all(color: Colors.grey.shade300),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildSubCategoryChip(String label, {bool isSelected = false}) {
     return GestureDetector(
-      onTap: () => _onCaseBrandSelected(label), 
+      onTap: () => _onCaseBrandSelected(label),
       child: Container(
-        margin: const EdgeInsets.only(right: 8), 
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), 
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade100 : Colors.grey.shade200, 
-          borderRadius: BorderRadius.circular(20), 
-          border: Border.all(color: isSelected ? const Color(0xFF0066FF) : Colors.transparent)
-        ), 
-        child: Text(label, style: TextStyle(color: isSelected ? const Color(0xFF0066FF) : Colors.black54, fontWeight: FontWeight.w600, fontSize: 13))
-      )
+          color: isSelected ? Colors.blue.shade100 : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0066FF) : Colors.transparent,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? const Color(0xFF0066FF) : Colors.black54,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
     );
   }
 }
