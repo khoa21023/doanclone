@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-// --- Imports từ cấu trúc dự án ---
 import '../../../../data/models/product_model.dart';
 import '../../../../data/services/mock_data.dart';
 import '../../../../data/providers/cart_provider.dart';
@@ -118,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
         titleSpacing: 0,
         automaticallyImplyLeading: false,
 
-        // --- BỐ CỤC CHÍNH APPBAR ĐÃ SỬA LỖI TRÀN ---
+        // --- BỐ CỤC CHÍNH APPBAR ---
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Column(
@@ -129,12 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // 1. LOGO
-                  Flexible(
-                    // Dùng Flexible để logo co lại nếu cần, tránh overflow
+                  Flexible( 
                     child: Container(
                       constraints: const BoxConstraints(
-                        maxWidth:
-                            200, // Giới hạn width logo nhỏ lại chút trên mobile
+                        maxWidth: 200, 
                         maxHeight: 60,
                       ),
                       alignment: Alignment.centerLeft,
@@ -154,18 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         alignment: Alignment.center,
                         children: [
                           IconButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WishlistScreen(),
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.favorite_border,
-                              color: Colors.white,
-                              size: 26,
-                            ), // Giảm size chút cho gọn
-                            tooltip: 'Yêu thích',
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WishlistScreen())), 
+                            icon: const Icon(Icons.favorite_border, color: Colors.white, size: 26), 
+                            tooltip: 'Yêu thích'
                           ),
                           if (wishlistProvider.items.isNotEmpty)
                             Positioned(
@@ -323,12 +311,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
 
-              const SizedBox(
-                height: 12,
-              ), // Khoảng cách giữa hàng Logo và hàng Search
-              // HÀNG 2: THANH TÌM KIẾM (Chiếm trọn chiều ngang)
+              const SizedBox(height: 12), 
+
+              // HÀNG 2: THANH TÌM KIẾM
               Container(
-                height: 44, // Chiều cao vừa phải
+                height: 44, 
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
@@ -351,8 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onChanged: (value) =>
                             setState(() => _searchQuery = value),
                         style: const TextStyle(fontSize: 15),
-                        textAlignVertical: TextAlignVertical
-                            .center, // Căn giữa text theo chiều dọc
+                        textAlignVertical: TextAlignVertical.center, 
                         decoration: const InputDecoration(
                           hintText: 'Bạn tìm gì hôm nay?',
                           hintStyle: TextStyle(
@@ -361,8 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: EdgeInsets
-                              .zero, // Xóa padding mặc định để căn giữa chuẩn
+                          contentPadding: EdgeInsets.zero 
                         ),
                       ),
                     ),
@@ -573,6 +558,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ),
+                                
+                                // Tag giảm giá
                                 Positioned(
                                   top: 8,
                                   left: 8,
@@ -595,113 +582,67 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: Consumer<WishlistProvider>(
-                                    builder: (context, wishlist, _) {
-                                      final isFav = wishlist.isFavorite(
-                                        product.id,
-                                      );
-                                      return GestureDetector(
-                                        onTap: () {
-                                          wishlist.toggleFavorite(product);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).hideCurrentSnackBar();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                isFav
-                                                    ? "Đã xóa khỏi yêu thích"
-                                                    : "Đã thêm vào yêu thích",
-                                              ),
-                                              duration: const Duration(
-                                                seconds: 1,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.8,
-                                            ),
-                                            shape: BoxShape.circle,
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black12,
-                                                blurRadius: 2,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Icon(
-                                            isFav
-                                                ? Icons.favorite
-                                                : Icons.favorite_border,
-                                            color: isFav
-                                                ? Colors.red
-                                                : Colors.grey,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
+                                
+                                // ĐÃ XÓA: Nút Wishlist ở góc trên bên phải
                               ],
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.all(8.0), // Padding nhỏ lại một chút
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  product.type,
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  product.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                Text(product.type, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text(product.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height: 8),
-
-                                // Dùng Wrap để tránh lỗi overflow 2.6 pixels ở phần giá
-                                Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                
+                                // --- LAYOUT MỚI: GIÁ BÊN TRÁI - NÚT "THÊM" BÊN PHẢI ---
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end, // Căn đáy
                                   children: [
-                                    Text(
-                                      currencyFormat.format(product.price),
-                                      style: const TextStyle(
-                                        color: Color(0xFF0066FF),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
+                                    // Cột hiển thị giá
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(currencyFormat.format(product.price), style: const TextStyle(color: Color(0xFF0066FF), fontWeight: FontWeight.bold, fontSize: 14)),
+                                          Text(currencyFormat.format(oldPrice), style: const TextStyle(color: Colors.grey, fontSize: 10, decoration: TextDecoration.lineThrough)),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      currencyFormat.format(oldPrice),
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 11,
-                                        decoration: TextDecoration.lineThrough,
+                                    
+                                    // Nút "Thêm"
+                                    InkWell(
+                                      onTap: () {
+                                        cartProvider.addItem(product);
+                                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text("Đã thêm ${product.name} vào giỏ hàng"),
+                                            duration: const Duration(seconds: 1),
+                                          )
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF0066FF), // Màu xanh chủ đạo
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Text(
+                                          "Thêm",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    )
                                   ],
-                                ),
+                                )
                               ],
                             ),
                           ),
