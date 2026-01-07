@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_tech_ct/features/client/cart/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../cart/checkout_screen.dart'; // Import màn hình thanh toán
+import '../../../../data/providers/wishlist_provider.dart'; // Import WishlistProvider
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -21,7 +20,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'VND', decimalDigits: 0);
-    // Giả lập giá cũ
     final double oldPrice = widget.product.price * 1.15; 
 
     return Scaffold(
@@ -117,7 +115,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
 
-          // 4. THANH BOTTOM BAR MỚI
+          // 4. THANH BOTTOM BAR (ĐÃ SỬA ĐỔI)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -126,46 +124,58 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
             child: Row(
               children: [
-                // NÚT 1: THÊM VÀO GIỎ (Vuông bo góc)
-                GestureDetector(
-                  onTap: () {
-                    context.read<CartProvider>().addItem(widget.product, quantity: quantity);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã thêm vào giỏ hàng!")));
-                  },
-                  child: Container(
-                    width: 50, height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50, // Màu nền nhạt
-                      border: Border.all(color: const Color(0xFF2563EB)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.add_shopping_cart, // Icon thêm giỏ hàng
-                      color: Color(0xFF2563EB),
-                    ),
-                  ),
+                // NÚT 1: WISHLIST (Icon trái tim)
+                Consumer<WishlistProvider>(
+                  builder: (context, wishlist, _) {
+                    final isFav = wishlist.isFavorite(widget.product.id);
+                    return GestureDetector(
+                      onTap: () {
+                        wishlist.toggleFavorite(widget.product);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(isFav ? "Đã xóa khỏi yêu thích" : "Đã thêm vào yêu thích"),
+                            duration: const Duration(seconds: 1),
+                          )
+                        );
+                      },
+                      child: Container(
+                        width: 50, height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey.shade300), // Viền xám nhạt như hình
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : Colors.grey.shade600, // Tim đỏ nếu đã thích, xám nếu chưa
+                        ),
+                      ),
+                    );
+                  }
                 ),
+                
                 const SizedBox(width: 16),
                 
-                // NÚT 2: THANH TOÁN NGAY (Màu xanh full)
+                // NÚT 2: THÊM VÀO GIỎ HÀNG (Màu xanh full)
                 Expanded(
                   child: SizedBox(
                     height: 50,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // 1. Thêm sản phẩm vào giỏ trước (Logic mua ngay thường là vậy)
                         context.read<CartProvider>().addItem(widget.product, quantity: quantity);
-                        
-                        // 2. Chuyển hướng sang trang thanh toán
-                        Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => const CheckoutScreen())
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Đã thêm ${quantity} ${widget.product.name} vào giỏ hàng!"),
+                            duration: const Duration(seconds: 1),
+                          )
                         );
                       },
-                      icon: const Icon(Icons.payment, color: Colors.white),
-                      label: const Text("Mua hàng ngay", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      icon: const Icon(Icons.add_shopping_cart, color: Colors.white), // Icon giỏ hàng
+                      label: const Text("Thêm vào giỏ hàng", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: const Color(0xFF2563EB), // Màu xanh chuẩn
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         elevation: 0,
