@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_tech_ct/features/client/home/views/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'data/providers/cart_provider.dart';
 import 'data/providers/wishlist_provider.dart';
@@ -55,7 +54,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: HomeScreen(), 
+        home: LoginScreen(),
       ),
     );
   }

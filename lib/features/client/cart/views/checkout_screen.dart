@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../data/widgets/checkout_stepper.dart';
+import '../../../../data/widgets/checkout_stepper.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
