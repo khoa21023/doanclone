@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../data/widgets/checkout_stepper.dart';
+import '/data/widgets/checkout_stepper.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -34,7 +34,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 12),
-                  const Text("Chọn phương thức", style: TextStyle(fontWeight: FontWeight.w500)),
+                  const Text(
+                    "Chọn phương thức",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -47,13 +50,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: DropdownButton<String>(
                         isExpanded: true,
                         value: selectedMethod,
-                        items: ['Thẻ tín dụng quốc tế (Visa/Master)', 'Ví MoMo', 'ZaloPay']
-                            .map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                        items:
+                            [
+                              'Thẻ tín dụng quốc tế (Visa/Master)',
+                              'Ví MoMo',
+                              'ZaloPay',
+                            ].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                         onChanged: (newValue) {
                           setState(() {
                             selectedMethod = newValue!;
@@ -73,28 +80,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Số thẻ", style: TextStyle(fontWeight: FontWeight.w500)),
+                        const Text(
+                          "Số thẻ",
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
                         const SizedBox(height: 8),
                         TextField(
                           decoration: InputDecoration(
                             hintText: "0000 0000 0000 0000",
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text("Tên in trên thẻ", style: TextStyle(fontWeight: FontWeight.w500)),
+                        const Text(
+                          "Tên in trên thẻ",
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
                         const SizedBox(height: 8),
                         TextField(
                           decoration: InputDecoration(
                             hintText: "NGUYEN VAN A",
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                           ),
                         ),
@@ -105,15 +128,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Ngày hết hạn", style: TextStyle(fontWeight: FontWeight.w500)),
+                                  const Text(
+                                    "Ngày hết hạn",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
                                   TextField(
                                     decoration: InputDecoration(
                                       hintText: "MM/YY",
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
-                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.shade300,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -125,16 +159,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Mã CVC/CVV", style: TextStyle(fontWeight: FontWeight.w500)),
+                                  const Text(
+                                    "Mã CVC/CVV",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
                                   TextField(
                                     obscureText: true,
                                     decoration: InputDecoration(
                                       hintText: "***",
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
-                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.shade300,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -155,7 +200,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       icon: const Icon(Icons.payment, color: Colors.white),
                       label: const Text(
                         "Đặt hàng • 30.020.000 VND",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1A65EB),
@@ -177,14 +226,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       children: [
                         const Text(
                           "Tóm tắt đơn hàng",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
-                            Text("iPhone 15 Pro Max", style: TextStyle(color: Colors.black87)),
-                            Text("29.990.000 VND", style: TextStyle(color: Colors.black87)),
+                            Text(
+                              "iPhone 15 Pro Max",
+                              style: TextStyle(color: Colors.black87),
+                            ),
+                            Text(
+                              "29.990.000 VND",
+                              style: TextStyle(color: Colors.black87),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -193,16 +251,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
-                            Text("Tạm tính", style: TextStyle(color: Colors.grey)),
-                            Text("29.990.000 VND", style: TextStyle(color: Colors.grey)),
+                            Text(
+                              "Tạm tính",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            Text(
+                              "29.990.000 VND",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
-                            Text("Phí giao hàng", style: TextStyle(color: Colors.grey)),
-                            Text("30.000 VND", style: TextStyle(color: Colors.grey)),
+                            Text(
+                              "Phí giao hàng",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            Text(
+                              "30.000 VND",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -213,7 +283,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           children: const [
                             Text(
                               "Tổng cộng",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             Text(
                               "30.020.000 VND",
