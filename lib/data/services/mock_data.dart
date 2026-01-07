@@ -5,11 +5,7 @@ import '../models/product_model.dart'; // Đảm bảo import model Product
 class MockData {
   // --- Dữ liệu User ---
   static List<Map<String, String>> users = [
-    {
-      'email': 'admin@phoneparts.com',
-      'password': 'admin123',
-      'name': 'Admin User',
-    },
+    {'email': 'admin@gmail.com', 'password': 'admin123', 'name': 'Admin User'},
   ];
 
   static bool register(String email, String password, String name) {
@@ -97,7 +93,8 @@ class MockData {
       id: 'case1',
       name: 'Ốp lưng Chống sốc S23 Ultra',
       price: 129000,
-      imageUrl: 'https://cuahangsamsung.vn/filemanager/userfiles/2023/12/4-2.png',
+      imageUrl:
+          'https://cuahangsamsung.vn/filemanager/userfiles/2023/12/4-2.png',
       color: 'Đen',
       type: 'Ốp lưng', // Khớp với tên danh mục
       condition: 'Mới',
@@ -109,7 +106,8 @@ class MockData {
       id: 'case2',
       name: 'Ốp lưng Da iPhone 15 Pro',
       price: 159000,
-      imageUrl: 'https://lesang.vn/images/san-pham/bao-da-iphone-15-pro-max-qlino-wallet-da-bo-that.jpg',
+      imageUrl:
+          'https://lesang.vn/images/san-pham/bao-da-iphone-15-pro-max-qlino-wallet-da-bo-that.jpg',
       color: 'Nâu',
       type: 'Ốp lưng',
       condition: 'Mới',
@@ -121,7 +119,8 @@ class MockData {
       id: 'case3',
       name: 'Ốp lưng Xiaomi 13 Pro',
       price: 89000,
-      imageUrl: 'https://product.hstatic.net/1000341816/product/1_aa9b228400c7471c96686b0be9f8c855_grande.jpg',
+      imageUrl:
+          'https://product.hstatic.net/1000341816/product/1_aa9b228400c7471c96686b0be9f8c855_grande.jpg',
       color: 'Trong suốt',
       type: 'Ốp lưng',
       condition: 'Mới',
@@ -135,7 +134,8 @@ class MockData {
       id: 'screen1',
       name: 'Màn hình iPhone 14 Pro Max (Zin bóc máy)',
       price: 8500000,
-      imageUrl: 'https://linhkiennamviet.vn/wp-content/uploads/2024/06/Man-hinh-iPhone-14-Pro-Max_linhkiennamviet.vn_.jpg',
+      imageUrl:
+          'https://linhkiennamviet.vn/wp-content/uploads/2024/06/Man-hinh-iPhone-14-Pro-Max_linhkiennamviet.vn_.jpg',
       color: 'Đen',
       type: 'Màn hình',
       condition: '99%',
@@ -149,7 +149,8 @@ class MockData {
       id: 'bat1',
       name: 'Pin Pisen dung lượng cao iPhone 11',
       price: 450000,
-      imageUrl: 'https://cdni.dienthoaivui.com.vn/x,webp,q100/https://dashboard.dienthoaivui.com.vn/uploads/wp-content/uploads/images/thay-pin-iphone-11-dung-luong-sieu-cao-pisen-7.jpg',
+      imageUrl:
+          'https://cdni.dienthoaivui.com.vn/x,webp,q100/https://dashboard.dienthoaivui.com.vn/uploads/wp-content/uploads/images/thay-pin-iphone-11-dung-luong-sieu-cao-pisen-7.jpg',
       color: 'Đen',
       type: 'Pin',
       condition: 'Mới',
@@ -163,7 +164,8 @@ class MockData {
       id: 'cam1',
       name: 'Cụm Camera sau Samsung S22 Ultra',
       price: 2100000,
-      imageUrl: 'https://chiemtaimobile.vn/images/detailed/41/cum-camera-sau-galaxy-s22-ultra-s22-ultra-5g-s908-zin-may.jpg', // Ảnh minh họa
+      imageUrl:
+          'https://chiemtaimobile.vn/images/detailed/41/cum-camera-sau-galaxy-s22-ultra-s22-ultra-5g-s908-zin-may.jpg', // Ảnh minh họa
       color: 'Đen',
       type: 'Camera',
       condition: 'Zin',
@@ -177,7 +179,8 @@ class MockData {
       id: 'motor1',
       name: 'Motor rung Taptic Engine iPhone 12',
       price: 150000,
-      imageUrl: 'https://thuanphatmobile.vn/images/cuc-rung-iphone-12-pro-max.jpg', 
+      imageUrl:
+          'https://thuanphatmobile.vn/images/cuc-rung-iphone-12-pro-max.jpg',
       color: 'Bạc',
       type: 'Motor',
       condition: 'Zin',
@@ -185,13 +188,14 @@ class MockData {
       rating: 4.5,
       reviews: 10,
     ),
-    
+
     // 6. PHỤ KIỆN
     Product(
       id: 'acc1',
       name: 'Củ sạc nhanh 20W Apple',
       price: 490000,
-      imageUrl: 'https://cdn.tgdd.vn/Products/Images/9499/230315/adapter-sac-type-c-20w-cho-iphone-ipad-apple-mhje3-avatar-1-1-600x600.jpg',
+      imageUrl:
+          'https://cdn.tgdd.vn/Products/Images/9499/230315/adapter-sac-type-c-20w-cho-iphone-ipad-apple-mhje3-avatar-1-1-600x600.jpg',
       color: 'Trắng',
       type: 'Phụ kiện',
       condition: 'Mới',

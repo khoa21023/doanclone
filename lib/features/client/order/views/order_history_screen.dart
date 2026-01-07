@@ -3,35 +3,37 @@ import 'package:provider/provider.dart';
 import '../view_models/order_view_model.dart';
 import '../../../../data/models/order.dart';
 
-class OrderHistoryScreen extends StatelessWidget{
+class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => OrderViewModel(),
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: (){}, 
-            icon: Icon(Icons.arrow_back)
-            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back),
+          ),
           title: const Text("Lịch sử mua hàng"),
           backgroundColor: const Color(0xFF2563EB),
           foregroundColor: Colors.white,
         ),
         body: Consumer<OrderViewModel>(
-          builder: (context, vm, _){
+          builder: (context, vm, _) {
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: vm.orders.length,
-              itemBuilder: (context, index){
+              itemBuilder: (context, index) {
                 return OrderCard(order: vm.orders[index]);
               },
-              );
-          }
-          ),
-      )
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -44,9 +46,7 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -76,17 +76,12 @@ class OrderCard extends StatelessWidget {
             children: [
               Text(
                 'Đơn hàng ${order.id}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
                 _formatDate(order.createdAt),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),
@@ -113,10 +108,7 @@ class OrderCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Số lượng: ${item.quantity}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
