@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/order_view_model.dart';
 import '../../../../data/models/order.dart';
-import '../../cart/views/order_detail_screen.dart'; // Đảm bảo đường dẫn này đúng với project của bạn
+import 'order_detail_screen.dart'; // Đảm bảo đường dẫn này đúng với project của bạn
 
 class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});

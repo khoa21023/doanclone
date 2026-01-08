@@ -14,7 +14,10 @@ class OrderDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Chi tiết đơn hàng", style: TextStyle(color: Colors.black)),
+        title: const Text(
+          "Chi tiết đơn hàng",
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -34,8 +37,14 @@ class OrderDetailScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text("Mã đơn hàng:", style: TextStyle(color: Colors.grey)),
-                      Text("#DH123456789", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        "Mã đơn hàng:",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Text(
+                        "#DH123456789",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -43,7 +52,10 @@ class OrderDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
                       Text("Ngày đặt:", style: TextStyle(color: Colors.grey)),
-                      Text("05/01/2026", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        "05/01/2026",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -51,14 +63,23 @@ class OrderDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
                       Text("Trạng thái:", style: TextStyle(color: Colors.grey)),
-                      Text("Đang xử lý", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                      Text(
+                        "Đang xử lý",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 15),
-            const Text("Sản phẩm", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              "Sản phẩm",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
@@ -79,13 +100,19 @@ class OrderDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Text("Bộ ống kính Camera đa năng", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          "Bộ ống kính Camera đa năng",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         SizedBox(height: 5),
                         Text("x1", style: TextStyle(color: Colors.grey)),
                       ],
                     ),
                   ),
-                  const Text("79,99 VND", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    "79,99 VND",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
@@ -105,8 +132,21 @@ class OrderDetailScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text("Tổng cộng", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text("84,99 VND", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue)),
+                      Text(
+                        "Tổng cộng",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        "84,99 VND",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.blue,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -120,13 +160,21 @@ class OrderDetailScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   side: const BorderSide(color: Colors.blue),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 onPressed: () {
                   // Quay về trang chủ (hoặc trang đầu tiên)
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
-                child: const Text("Về trang chủ", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  "Về trang chủ",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

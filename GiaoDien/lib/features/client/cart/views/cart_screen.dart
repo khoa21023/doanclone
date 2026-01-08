@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:mobile_tech_ct/features/cart/view_model/cart_provider.dart';
-import 'checkout_screen.dart';
+import 'package:mobile_tech_ct/features/client/cart/view_models/cart_provider.dart';
+import '../../checkout/views/checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -11,9 +11,7 @@ class CartScreen extends StatelessWidget {
     final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Giỏ hàng'),
-      ),
+      appBar: AppBar(title: const Text('Giỏ hàng')),
       body: cart.items.isEmpty
           ? const Center(child: Text('Giỏ hàng trống'))
           : Column(
@@ -27,7 +25,8 @@ class CartScreen extends StatelessWidget {
                         leading: const Icon(Icons.shopping_bag),
                         title: Text(cartItem.product.name),
                         subtitle: Text(
-                            '${cartItem.product.price} x ${cartItem.quantity}'),
+                          '${cartItem.product.price} x ${cartItem.quantity}',
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
@@ -46,7 +45,7 @@ class CartScreen extends StatelessWidget {
                       BoxShadow(
                         blurRadius: 10,
                         color: Colors.grey.withOpacity(0.1),
-                      )
+                      ),
                     ],
                   ),
                   child: Column(
@@ -79,7 +78,8 @@ class CartScreen extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const CheckoutScreen()),
+                                builder: (context) => const CheckoutScreen(),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -94,7 +94,7 @@ class CartScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
     );

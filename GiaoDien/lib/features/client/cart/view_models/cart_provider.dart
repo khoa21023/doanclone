@@ -6,11 +6,7 @@ class CartItem {
   final Product product;
   int quantity;
 
-  CartItem({
-    required this.id,
-    required this.product,
-    this.quantity = 1,
-  });
+  CartItem({required this.id, required this.product, this.quantity = 1});
 }
 
 class CartProvider extends ChangeNotifier {
@@ -19,7 +15,10 @@ class CartProvider extends ChangeNotifier {
   List<CartItem> get items => _items;
 
   double get totalAmount {
-    return _items.fold(0.0, (sum, item) => sum + (item.product.price * item.quantity));
+    return _items.fold(
+      0.0,
+      (sum, item) => sum + (item.product.price * item.quantity),
+    );
   }
 
   void addItem(Product p) {
@@ -27,11 +26,9 @@ class CartProvider extends ChangeNotifier {
     if (index >= 0) {
       _items[index].quantity += 1;
     } else {
-      _items.add(CartItem(
-        id: DateTime.now().toString(),
-        product: p,
-        quantity: 1,
-      ));
+      _items.add(
+        CartItem(id: DateTime.now().toString(), product: p, quantity: 1),
+      );
     }
     notifyListeners();
   }
