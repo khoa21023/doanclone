@@ -32,7 +32,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(32),
                   child: Consumer<ForgotPasswordViewModel>(
                     builder: (context, viewModel, child) {
-                      // Tùy thuộc vào trạng thái submitted để hiển thị view tương ứng
                       return viewModel.submitted
                           ? _buildSuccessView(context, viewModel)
                           : _buildFormView(context, viewModel);
@@ -47,7 +46,6 @@ class ForgotPasswordScreen extends StatelessWidget {
     );
   }
 
-  // View khi đã gửi thành công
   Widget _buildSuccessView(
     BuildContext context,
     ForgotPasswordViewModel viewModel,
@@ -111,7 +109,6 @@ class ForgotPasswordScreen extends StatelessWidget {
     );
   }
 
-  // View nhập email
   Widget _buildFormView(
     BuildContext context,
     ForgotPasswordViewModel viewModel,

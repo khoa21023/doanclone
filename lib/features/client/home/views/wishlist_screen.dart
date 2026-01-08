@@ -5,13 +5,13 @@ import 'package:intl/intl.dart';
 import '../../../../data/models/product_model.dart';
 import '../../../../data/providers/wishlist_provider.dart';
 import '../../../../data/providers/cart_provider.dart';
+import 'product_detail_screen.dart'; // Import màn hình chi tiết sản phẩm
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Lấy dữ liệu từ Provider
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final favorites = wishlistProvider.items;
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'VND', decimalDigits: 0);
@@ -23,7 +23,7 @@ class WishlistScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
-      backgroundColor: const Color(0xFFF5F7FA), // Màu nền xám nhạt
+      backgroundColor: const Color(0xFFF5F7FA),
       body: favorites.isEmpty
           ? Center(
               child: Column(
@@ -70,19 +70,29 @@ class WishlistScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Ảnh lớn + Nút xóa (Icon thùng rác đỏ trong vòng tròn trắng)
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  color: const Color(0xFFFFF8E1), // Màu nền vàng nhạt giống hình mẫu
-                  child: Image.network(
-                    product.imageUrl,
-                    fit: BoxFit.contain, // Hiển thị trọn vẹn ảnh
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey),
+              // Bọc ảnh bằng GestureDetector để chuyển trang
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailScreen(product: product),
+                    ),
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Container(
+                    height: 180,
+                    width: double.infinity,
+                    color: const Color(0xFFFFF8E1),
+                    child: Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey),
+                    ),
                   ),
                 ),
               ),
@@ -109,23 +119,29 @@ class WishlistScreen extends StatelessWidget {
             ],
           ),
           
-          // 2. Thông tin chi tiết
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tên
-                Text(
-                  product.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(product: product),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    product.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 2, overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                // Danh mục
                 Text(product.type, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 const SizedBox(height: 8),
-                // Rating
                 Row(
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 16),
@@ -134,14 +150,12 @@ class WishlistScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Giá
                 Text(
                   currencyFormat.format(product.price),
                   style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 18)
                 ),
                 const SizedBox(height: 16),
                 
-                // 3. Nút Thêm vào giỏ (Xanh full width)
                 SizedBox(
                   width: double.infinity,
                   height: 45,

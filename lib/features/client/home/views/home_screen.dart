@@ -79,10 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     double screenWidth = MediaQuery.of(context).size.width;
-    // Điều chỉnh số cột linh hoạt để tránh tràn layout grid
     int crossAxisCount = screenWidth > 800 ? 4 : 2;
 
-    // --- LOGIC LỌC SẢN PHẨM ---
     List<Product> displayedProducts = _allProducts.where((p) {
       bool matchesCategory = true;
       if (_selectedCategory == "Tất cả") {
@@ -99,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return matchesCategory && matchesSearch;
     }).toList();
 
-    // --- LOGIC SẮP XẾP ---
     if (_currentSortOption == 'Tên') {
       displayedProducts.sort((a, b) => a.name.compareTo(b.name));
     } else if (_currentSortOption == 'Giá: Thấp đến Cao') {
@@ -112,22 +109,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0066FF),
         elevation: 0,
-        // Tăng chiều cao AppBar lên 140 để chứa đủ 2 dòng (Logo/Icon và Search) thoải mái
         toolbarHeight: 140,
         titleSpacing: 0,
         automaticallyImplyLeading: false,
-
-        // --- BỐ CỤC CHÍNH APPBAR ---
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // HÀNG 1: LOGO (Trái) + ICONS (Phải)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 1. LOGO
                   Flexible(
                     child: Container(
                       constraints: const BoxConstraints(
@@ -141,12 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-
-                  // 2. CÁC BUTTON CHỨC NĂNG
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Nút Wishlist
                       Stack(
                         alignment: Alignment.center,
                         children: [
@@ -191,8 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                         ],
                       ),
-
-                      // Nút Giỏ hàng
                       Stack(
                         alignment: Alignment.center,
                         children: [
@@ -231,8 +218,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                         ],
                       ),
-
-                      // Nút Lịch sử
                       IconButton(
                         onPressed: () {
                           Navigator.push(
@@ -249,8 +234,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         tooltip: 'Lịch sử',
                       ),
-
-                      // Nút Profile (Hồ sơ)
                       IconButton(
                         onPressed: () {
                           Navigator.push(
@@ -266,11 +249,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: 26,
                         ),
                       ),
-
-                      // Nút Logout (Đăng xuất)
                       IconButton(
                         onPressed: () {
-                          // Hiển thị hộp thoại xác nhận đăng xuất
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -291,10 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       style: TextStyle(color: Colors.red),
                                     ),
                                     onPressed: () {
-                                      // Đóng dialog
                                       Navigator.of(context).pop();
-
-                                      // Quay về màn hình Login và xóa hết các màn hình trước đó khỏi stack
                                       Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(
@@ -319,10 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
-              // HÀNG 2: THANH TÌM KIẾM
               Container(
                 height: 44,
                 decoration: BoxDecoration(
@@ -360,7 +334,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    // Nút Filter
                     Container(
                       margin: const EdgeInsets.only(right: 4),
                       child: IconButton(
@@ -381,12 +354,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- BỘ LỌC SẮP XẾP ---
             if (_isFilterVisible)
               Container(
                 color: Colors.white,
@@ -424,10 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
             const SizedBox(height: 16),
-
-            // --- LIST DANH MỤC ---
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -442,8 +410,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     .toList(),
               ),
             ),
-
-            // --- SUB-CATEGORY ỐP LƯNG & NÚT TỰ THIẾT KẾ ---
             if (_selectedCategory == "Ốp lưng") ...[
               const SizedBox(height: 12),
               SingleChildScrollView(
@@ -463,7 +429,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       "Xiaomi",
                       isSelected: _selectedCaseBrand == "Xiaomi",
                     ),
-
                     Container(
                       margin: const EdgeInsets.only(left: 8),
                       child: ElevatedButton.icon(
@@ -495,7 +460,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
-
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -505,8 +469,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // --- GRID SẢN PHẨM ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.builder(
@@ -567,8 +529,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ),
-
-                                // Tag giảm giá
                                 Positioned(
                                   top: 8,
                                   left: 8,
@@ -591,15 +551,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ),
-
-                                // ĐÃ XÓA: Nút Wishlist ở góc trên bên phải
                               ],
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(
-                              8.0,
-                            ), // Padding nhỏ lại một chút
+                            padding: const EdgeInsets.all(8.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -621,24 +577,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 8),
-
-                                // --- LAYOUT MỚI: GIÁ BÊN TRÁI - NÚT "THÊM" BÊN PHẢI ---
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.end, // Căn đáy
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    // Cột hiển thị giá
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            currencyFormat.format(
-                                              product.price,
-                                            ),
+                                            currencyFormat
+                                                .format(product.price),
                                             style: const TextStyle(
                                               color: Color(0xFF0066FF),
                                               fontWeight: FontWeight.bold,
@@ -657,8 +608,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ],
                                       ),
                                     ),
-
-                                    // Nút "Thêm"
                                     InkWell(
                                       onTap: () {
                                         cartProvider.addItem(product);
@@ -684,12 +633,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF0066FF,
-                                          ), // Màu xanh chủ đạo
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
+                                          color: const Color(0xFF0066FF),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: const Text(
                                           "Thêm",

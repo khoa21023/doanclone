@@ -1,13 +1,17 @@
 class UserProfile {
-  String name;
-  String email;
-  String phone;
-  String address;
-  
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+  final String address;
+  final String? avatarUrl;
+
   UserProfile({
+    required this.id,
     required this.name,
     required this.email,
     required this.phone,
-    required this.address
+    required this.address,
+    this.avatarUrl,
   });
 }
