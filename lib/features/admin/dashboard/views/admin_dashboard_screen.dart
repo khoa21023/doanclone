@@ -4,6 +4,7 @@ import '../view_models/admin_dashboard_view_model.dart';
 import '../../promotions/views/promotions_screen.dart';
 import '../../order/views/admin_order_detail_screen.dart';
 import '../../../../data/models/order.dart';
+import '../../../auth/views/login_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -24,13 +25,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 1. Tính toán tỷ lệ để thẻ luôn có chiều cao hợp lý (~110px)
-    // Công thức: (Chiều rộng màn hình - Padding) / (Số cột * Chiều cao mong muốn)
     double screenWidth = MediaQuery.of(context).size.width;
-    double itemHeight = 110.0; // Chiều cao cố định mong muốn cho mỗi thẻ
-    double itemWidth =
-        (screenWidth - 32 - 12) /
-        2; // Trừ padding (16*2) và khoảng cách giữa các cột (12)
+    double itemHeight = 110.0;
+    double itemWidth = (screenWidth - 32 - 12) / 2;
     double aspectRatio = itemWidth / itemHeight;
 
     return ChangeNotifierProvider(
@@ -68,10 +65,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              onPressed: () =>
-                  Navigator.of(context).popUntil((route) => route.isFirst),
+              icon: const Icon(Icons.logout),
+              color: Colors.white,
+              tooltip: "Đăng xuất",
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Đăng xuất"),
+                      content: const Text(
+                        "Bạn có chắc chắn muốn đăng xuất quyền Admin?",
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("Hủy"),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        TextButton(
+                          child: const Text(
+                            "Đồng ý",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
+            const SizedBox(width: 8),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48),
@@ -96,19 +129,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           builder: (context, viewModel, child) {
             return Column(
               children: [
-                // Container chứa 4 thẻ thống kê
                 Container(
                   padding: const EdgeInsets.all(16),
                   color: Colors.blue.shade50,
                   child: GridView.count(
-                    crossAxisCount: 2, // 2 cột
+                    crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    shrinkWrap: true, // Co gọn lại vừa đủ nội dung
-                    physics:
-                        const NeverScrollableScrollPhysics(), // Không cuộn riêng lẻ
-                    childAspectRatio:
-                        aspectRatio, // <-- SỬ DỤNG TỶ LỆ ĐỘNG ĐÃ TÍNH
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: aspectRatio,
                     children: [
                       _buildStatCard(
                         'Tổng đơn hàng',
@@ -137,8 +167,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     ],
                   ),
                 ),
-
-                // Danh sách đơn hàng bên dưới
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,

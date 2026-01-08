@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/login_view_model.dart';
-import 'signup_screen.dart'; // Import màn hình đăng ký
-import 'forgot_password_screen.dart'; // Import màn hình quên pass
+import 'signup_screen.dart'; 
+import 'forgot_password_screen.dart'; 
 import '../../admin/dashboard/views/admin_dashboard_screen.dart';
 import '../../client/home/views/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
-  // Controller vẫn giữ ở View vì nó gắn liền với vòng đời của Widget UI
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -57,7 +56,6 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 32),
 
-                          // Email Input
                           _buildTextField(
                             label: 'Email',
                             controller: _emailController,
@@ -66,7 +64,6 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          // Password Input
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -77,8 +74,7 @@ class LoginScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               TextField(
                                 controller: _passwordController,
-                                obscureText:
-                                    viewModel.obscurePassword, // Lấy từ VM
+                                obscureText: viewModel.obscurePassword,
                                 decoration: InputDecoration(
                                   hintText: '••••••••',
                                   prefixIcon: const Icon(
@@ -92,15 +88,13 @@ class LoginScreen extends StatelessWidget {
                                           : Icons.visibility_outlined,
                                       color: Colors.grey,
                                     ),
-                                    onPressed: viewModel
-                                        .togglePasswordVisibility, // Gọi VM
+                                    onPressed: viewModel.togglePasswordVisibility,
                                   ),
                                 ),
                               ),
                             ],
                           ),
 
-                          // Error Message
                           if (viewModel.errorMessage != null) ...[
                             const SizedBox(height: 16),
                             Container(
@@ -149,39 +143,30 @@ class LoginScreen extends StatelessWidget {
                               onPressed: viewModel.isLoading
                                   ? null
                                   : () async {
-                                      // Gọi hàm login từ ViewModel
                                       bool success = await viewModel.login(
                                         _emailController.text,
                                         _passwordController.text,
                                       );
 
                                       if (success && context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
+                                        ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
-                                            content: Text(
-                                              'Đăng nhập thành công!',
-                                            ),
+                                            content: Text('Đăng nhập thành công!'),
                                           ),
                                         );
 
-                                        // Logic điều hướng
-                                        if (_emailController.text ==
-                                            'admin@phoneparts.com') {
+                                        if (_emailController.text == 'admin@gmail.com') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const AdminDashboardScreen(),
+                                              builder: (_) => const AdminDashboardScreen(),
                                             ),
                                           );
                                         } else {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const HomeScreen(),
+                                              builder: (_) => const HomeScreen(),
                                             ),
                                           );
                                         }
@@ -240,44 +225,6 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-
-                          // Demo Account Info
-                          const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tài khoản Demo:',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Admin: admin@phoneparts.com / admin123',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                Text(
-                                  'User: user@example.com / user123',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       );
                     },
@@ -291,7 +238,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Widget con để code gọn hơn
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
