@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'order_detail_screen.dart';
+import '../../order/views/order_detail_screen.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -35,7 +35,8 @@ class SuccessScreen extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 40),
-            
+
+            // Nút Xem Đơn Hàng
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -49,12 +50,18 @@ class SuccessScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const OrderDetailScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const OrderDetailScreen(),
+                    ),
                   );
                 },
                 child: const Text(
                   "Xem đơn hàng",
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
