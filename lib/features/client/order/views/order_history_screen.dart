@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/order_view_model.dart';
 import '../../../../data/models/order.dart';
+import '../../cart/views/order_detail_screen.dart'; // Đảm bảo đường dẫn này đúng với project của bạn
 
 class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});
@@ -16,7 +17,7 @@ class OrderHistoryScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
           ),
           title: const Text("Lịch sử mua hàng"),
           backgroundColor: const Color(0xFF2563EB),
@@ -28,7 +29,19 @@ class OrderHistoryScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: vm.orders.length,
               itemBuilder: (context, index) {
-                return OrderCard(order: vm.orders[index]);
+                final order = vm.orders[index];
+                return GestureDetector(
+                  onTap: () {
+                    // Chuyển sang màn hình chi tiết đơn hàng
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OrderDetailScreen(),
+                      ),
+                    );
+                  },
+                  child: OrderCard(order: order),
+                );
               },
             );
           },
@@ -54,9 +67,6 @@ class OrderCard extends StatelessWidget {
           children: [
             _buildHeader(),
             const Divider(height: 24),
-            // map(_buildItem) biến mỗi sản phẩm thành 1 Widget
-            //// Dấu ... (spread operator) dùng để "trải" danh sách Widget ra cho childrenn
-            // Không ... ->children: [ [Widget, Widget, Widget] ] || Có ...->children: [ Widget, Widget, Widget ]
             ...order.items.map(_buildItem),
             const Divider(height: 24),
             _buildTotal(),

@@ -11,7 +11,6 @@ class PromotionsScreen extends StatefulWidget {
 }
 
 class _PromotionsScreenState extends State<PromotionsScreen> {
-  // 1. Tạo controller để quản lý nhập liệu
   final _codeController = TextEditingController();
   final _discountController = TextEditingController();
 
@@ -22,11 +21,7 @@ class _PromotionsScreenState extends State<PromotionsScreen> {
     super.dispose();
   }
 
-  // Hàm hiển thị Form thêm khuyến mãi
   void _showAddPromoSheet(BuildContext context) {
-    final viewModel = context.read<PromotionsViewModel>();
-
-    // Reset dữ liệu cũ trong form
     _codeController.clear();
     _discountController.clear();
 
@@ -49,21 +44,16 @@ class _PromotionsScreenState extends State<PromotionsScreen> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // 2. Gắn controller vào TextField Mã giảm giá
             TextField(
-              controller: _codeController, // <-- QUAN TRỌNG
+              controller: _codeController,
               decoration: const InputDecoration(
                 labelText: "Mã giảm giá (VD: SAVE20)",
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 12),
-
-            // 3. Gắn controller vào TextField % Giảm
             TextField(
-              controller: _discountController, // <-- QUAN TRỌNG
+              controller: _discountController,
               decoration: const InputDecoration(
                 labelText: "Phần trăm giảm (%)",
                 suffixText: "%",
@@ -71,37 +61,33 @@ class _PromotionsScreenState extends State<PromotionsScreen> {
               ),
               keyboardType: TextInputType.number,
             ),
-
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // Validate cơ bản
                   if (_codeController.text.isEmpty ||
                       _discountController.text.isEmpty) {
                     return;
                   }
 
-                  // 4. Lấy dữ liệu thật từ Controller
                   final codeInput = _codeController.text.toUpperCase();
                   final discountInput =
                       int.tryParse(_discountController.text) ?? 0;
 
-                  viewModel.addPromotion(
-                    Promotion(
-                      id: "PROMO-${DateTime.now().millisecondsSinceEpoch}",
-                      type: "voucher",
-                      code: codeInput, // <-- Dùng giá trị nhập thật
-                      discountPercent:
-                          discountInput, // <-- Dùng giá trị nhập thật
-                      isActive: true,
-                      expiresAt: DateTime.now().add(
-                        const Duration(days: 30),
-                      ), // Mặc định hết hạn sau 30 ngày
-                    ),
-                  );
+                  context.read<PromotionsViewModel>().addPromotion(
+                        Promotion(
+                          id: "PROMO-${DateTime.now().millisecondsSinceEpoch}",
+                          type: "voucher",
+                          code: codeInput,
+                          discountPercent: discountInput,
+                          isActive: true,
+                          expiresAt: DateTime.now().add(
+                            const Duration(days: 30),
+                          ),
+                        ),
+                      );
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(

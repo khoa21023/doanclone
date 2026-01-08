@@ -1,52 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/user_profile.dart';
 
-class ProfileViewmodel extends ChangeNotifier{
-  bool isEditingProfile = false;
-  bool isChangingPassword = false;
+class ProfileViewModel extends ChangeNotifier {
+  UserProfile? _user;
+  bool _isLoading = false;
 
-  UserProfile _profile;
-  ProfileViewmodel():
-  _profile= UserProfile(
-    name: "Nguyễn Văn A",
-    email: "user@example.com",
-    phone: "0123456789",
-    address: "65 Huỳnh Thúc Kháng, Sài Gòn, Tp HCM"
-  );
+  UserProfile? get user => _user;
+  bool get isLoading => _isLoading;
 
-  UserProfile get profile => _profile;
-
-  void startEditProfile(){
-    isEditingProfile = true;
-
-    notifyListeners();
+  ProfileViewModel() {
+    loadProfile();
   }
-  void cancelEditProfile(){
-    isEditingProfile= false;
+
+  Future<void> loadProfile() async {
+    _isLoading = true;
     notifyListeners();
-  }
-  void saveProfile({
-    required String name,
-    required String email,
-    required String phone,
-    required String address
-  }){
-    final profile = UserProfile(
-      name: name,
-      email: email,
-      phone: phone,
-      address: address,
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    _user = UserProfile(
+      id: '1',
+      name: 'Nguyễn Văn A',
+      email: 'client@gmail.com',
+      phone: '0909123456',
+      address: 'Ninh Kiều, Cần Thơ',
+      avatarUrl: 'https://i.pravatar.cc/150?img=3',
     );
-    _profile = profile;
-    isEditingProfile = false;
-    notifyListeners();
-  }
-  void startChangePassword(){
-    isChangingPassword = true;
-    notifyListeners();
-  }
-  void cancelChangePassword(){
-    isChangingPassword = false;
+
+    _isLoading = false;
     notifyListeners();
   }
 }

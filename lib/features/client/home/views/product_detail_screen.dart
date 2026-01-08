@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../../../data/providers/wishlist_provider.dart'; // Import WishlistProvider
+import '../../../../data/providers/wishlist_provider.dart';
+import '../../cart/views/cart_screen.dart'; 
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -30,6 +31,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartScreen()),
+              );
+            },
+            icon: const Icon(Icons.shopping_cart_outlined),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -115,7 +127,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
 
-          // 4. THANH BOTTOM BAR (ĐÃ SỬA ĐỔI)
+          // 4. THANH BOTTOM BAR
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -143,12 +155,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         width: 50, height: 50,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300), // Viền xám nhạt như hình
+                          border: Border.all(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           isFav ? Icons.favorite : Icons.favorite_border,
-                          color: isFav ? Colors.red : Colors.grey.shade600, // Tim đỏ nếu đã thích, xám nếu chưa
+                          color: isFav ? Colors.red : Colors.grey.shade600,
                         ),
                       ),
                     );
@@ -157,7 +169,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 
                 const SizedBox(width: 16),
                 
-                // NÚT 2: THÊM VÀO GIỎ HÀNG (Màu xanh full)
+                // NÚT 2: THÊM VÀO GIỎ HÀNG
                 Expanded(
                   child: SizedBox(
                     height: 50,
@@ -169,13 +181,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           SnackBar(
                             content: Text("Đã thêm ${quantity} ${widget.product.name} vào giỏ hàng!"),
                             duration: const Duration(seconds: 1),
+                            action: SnackBarAction(
+                              label: 'Đến giỏ hàng',
+                              textColor: Colors.yellow,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const CartScreen()),
+                                );
+                              },
+                            ),
                           )
                         );
                       },
-                      icon: const Icon(Icons.add_shopping_cart, color: Colors.white), // Icon giỏ hàng
+                      icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
                       label: const Text("Thêm vào giỏ hàng", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB), // Màu xanh chuẩn
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         elevation: 0,

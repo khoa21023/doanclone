@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'success_screen.dart';
+import 'success_screen.dart'; 
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -16,11 +16,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _cityController = TextEditingController();
   final _zipController = TextEditingController();
   final _phoneController = TextEditingController();
+  
   final _promoController = TextEditingController();
 
   void _goToPayment() {
     setState(() {
-      _currentStep = 1;
+      _currentStep = 1; 
     });
   }
 
@@ -37,7 +38,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _currentStep--;
       });
     } else {
-      Navigator.pop(context);
+      Navigator.pop(context); 
     }
   }
 

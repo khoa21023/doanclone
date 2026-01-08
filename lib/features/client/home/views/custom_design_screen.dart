@@ -1,7 +1,7 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui; // Import thư viện UI để xử lý ảnh
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'; // Import để dùng RenderRepaintBoundary
+import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/models/design_item.dart'; 
@@ -16,7 +16,6 @@ class CustomDesignScreen extends StatefulWidget {
 }
 
 class _CustomDesignScreenState extends State<CustomDesignScreen> {
-  // --- GlobalKey để chụp ảnh widget ---
   final GlobalKey _globalKey = GlobalKey();
 
   int _currentStep = 1;
@@ -24,7 +23,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
   String? _selectedQuality;
   String? _selectedMaterial;
 
-  // --- TRẠNG THÁI THIẾT KẾ ---
   int _selectedToolIndex = 0; 
   Uint8List? _uploadedImageBytes; 
   final ImagePicker _picker = ImagePicker();
@@ -83,11 +81,9 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     });
   }
 
-  // --- HÀM CHỤP ẢNH THIẾT KẾ (MỚI) ---
   Future<Uint8List?> _captureDesign() async {
     try {
       RenderRepaintBoundary boundary = _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      // pixelRatio: 3.0 để ảnh nét hơn
       ui.Image image = await boundary.toImage(pixelRatio: 3.0); 
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
@@ -97,12 +93,11 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     }
   }
 
-  // --- HÀM LƯU VÀO GIỎ HÀNG (CẬP NHẬT) ---
   void _addToCart() async {
-    // 1. Chụp ảnh thiết kế thành file bytes
     Uint8List? finalDesignImage = await _captureDesign();
 
     if (finalDesignImage == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lỗi xử lý ảnh thiết kế!")));
       return;
     }
@@ -123,12 +118,11 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     
     if (!mounted) return;
 
-    // 2. Truyền finalDesignImage vào giỏ hàng
     context.read<CartProvider>().addItem(
       customProduct,
       quantity: 1,
       isCustom: true,
-      img: finalDesignImage, // <-- ẢNH ĐÃ CHỤP (FINAL)
+      img: finalDesignImage,
       text: customDetailText.isNotEmpty ? customDetailText : null,
       sticker: _selectedSticker
     );
@@ -177,7 +171,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     );
   }
 
-  // (Step 1 và Step 2 giữ nguyên code cũ...)
   Widget _buildStep1() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +232,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     );
   }
 
-  // --- BƯỚC 3: CẬP NHẬT REPAINT BOUNDARY ---
   Widget _buildStep3_Design() {
     bool isSamsung = _selectedBrand == "Samsung"; 
     
@@ -256,7 +248,7 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
                 child: const Row(children: [Icon(Icons.arrow_back, size: 16), Text("Quay lại")]),
               ),
               ElevatedButton(
-                onPressed: _addToCart, // Gọi hàm mới
+                onPressed: _addToCart, 
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white),
                 child: const Text("THÊM VÀO GIỎ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))
               )
@@ -268,7 +260,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. THANH CÔNG CỤ
               Container(
                 width: 60, color: Colors.black,
                 child: Column(
@@ -281,7 +272,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
                 ),
               ),
               
-              // 2. BẢNG ĐIỀU KHIỂN
               if (_selectedToolIndex != 0)
                 Container(
                   width: 140,
@@ -344,18 +334,15 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
                   ),
                 ),
 
-              // 3. KHUNG HIỂN THỊ (CANVAS)
               Expanded(
                 child: Container(
                   color: Colors.white,
                   child: Center(
-                    // --- BỌC REPAINT BOUNDARY Ở ĐÂY ĐỂ CHỤP ẢNH ---
                     child: RepaintBoundary(
-                      key: _globalKey, // Gán key
+                      key: _globalKey, 
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Hình dạng ốp lưng (Mask)
                           Container(
                             width: 200, height: 400,
                             decoration: BoxDecoration(
@@ -369,17 +356,14 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
-                                  // Layer 1: Ảnh upload
                                   if (_uploadedImageBytes != null)
                                     Image.memory(_uploadedImageBytes!, fit: BoxFit.cover),
                                   
-                                  // Layer 2: Các item kéo thả (Chữ, Sticker)
                                   ..._designItems.map((item) => _buildDraggableItem(item)).toList(),
                                 ],
                               ),
                             ),
                           ),
-                          // Layer 3: Cụm Camera (Đè lên trên cùng)
                           Positioned(
                             top: 20, left: 20,
                             child: IgnorePointer(
@@ -399,7 +383,6 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
     );
   }
 
-  // ... (Giữ nguyên các widget hỗ trợ: _buildDraggableItem, _buildQualityOption, _buildCaseTypeBtn, v.v...)
   Widget _buildDraggableItem(DesignItem item) {
     return Positioned(
       left: item.position.dx,
@@ -468,4 +451,3 @@ class _CustomDesignScreenState extends State<CustomDesignScreen> {
   Widget _buildStepCircle(String step, String title, bool isActive) => Column(children: [Container(width: 35, height: 35, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white, border: Border.all(color: isActive ? Colors.deepOrange : Colors.grey.shade400, width: 2)), alignment: Alignment.center, child: Text(step, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isActive ? Colors.deepOrange : Colors.grey))), const SizedBox(height: 4), Text(title, style: TextStyle(fontSize: 10, color: isActive ? Colors.black : Colors.grey))]);
   Widget _buildStepConnector() => Container(width: 30, height: 1, color: Colors.grey.shade300);
 }
-

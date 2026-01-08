@@ -126,7 +126,7 @@ class SignupScreen extends StatelessWidget {
                               TextField(
                                 controller: _confirmPasswordController,
                                 obscureText: viewModel
-                                    .obscurePassword, // Dùng chung state ẩn/hiện với password chính
+                                    .obscurePassword, 
                                 decoration: const InputDecoration(
                                   hintText: '••••••••',
                                   prefixIcon: Icon(
@@ -184,9 +184,8 @@ class SignupScreen extends StatelessWidget {
                                             ),
                                           ),
                                         );
-                                        Navigator.pop(
-                                          context,
-                                        ); // Quay về trang login
+                                        // Quay về trang Login sau khi đăng ký thành công
+                                        Navigator.pop(context); 
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
