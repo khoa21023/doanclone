@@ -8,9 +8,9 @@ import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
 import '../../../../features/client/cart/views/cart_screen.dart';
 
-import 'product_detail_screen.dart';
-import 'wishlist_screen.dart';
-import 'custom_design_screen.dart';
+import '../../product/views/product_detail_screen.dart';
+import '../../wishlist/views/wishlist_screen.dart';
+import '../../product/views/custom_design_screen.dart';
 import '../../profile/views/profile_screen.dart';
 import '../../order/views/order_history_screen.dart';
 import '../../../auth/views/login_screen.dart';
@@ -588,8 +588,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            currencyFormat
-                                                .format(product.price),
+                                            currencyFormat.format(
+                                              product.price,
+                                            ),
                                             style: const TextStyle(
                                               color: Color(0xFF0066FF),
                                               fontWeight: FontWeight.bold,
@@ -634,8 +635,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF0066FF),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: const Text(
                                           "Thêm",
