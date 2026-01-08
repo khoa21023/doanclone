@@ -123,6 +123,7 @@ class OrderDetailScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () {
+                  // Quay về trang chủ (hoặc trang đầu tiên)
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 child: const Text("Về trang chủ", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),

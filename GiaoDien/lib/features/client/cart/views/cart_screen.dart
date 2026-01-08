@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../data/providers/cart_provider.dart';
+import 'package:mobile_tech_ct/features/cart/view_model/cart_provider.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
