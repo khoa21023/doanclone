@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/providers/wishlist_provider.dart';
-import '../../../../data/providers/cart_provider.dart';
+import '../../../../data/providers/home_cart_provider.dart';
 import '../../product/views/product_detail_screen.dart'; // Import màn hình chi tiết sản phẩm
 
 class WishlistScreen extends StatelessWidget {

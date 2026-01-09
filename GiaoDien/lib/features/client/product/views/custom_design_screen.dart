@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/models/design_item.dart';
 import '../../../../data/models/product_model.dart';
-import '../../../../data/providers/cart_provider.dart';
+import '../../../../data/providers/home_cart_provider.dart';
 
 class CustomDesignScreen extends StatefulWidget {
   const CustomDesignScreen({super.key});

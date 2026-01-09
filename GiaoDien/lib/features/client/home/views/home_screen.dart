@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
 import '../../../../data/services/mock_data.dart';
-import '../../../../data/providers/cart_provider.dart';
+import '../../../../data/providers/home_cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
 import '../../../../features/client/cart/views/cart_screen.dart';
 

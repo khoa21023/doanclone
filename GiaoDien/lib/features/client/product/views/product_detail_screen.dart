@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../data/models/product_model.dart';
-import '../../../../data/providers/cart_provider.dart';
+import '../../../../data/providers/home_cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
 import '../../cart/views/cart_screen.dart';
 
