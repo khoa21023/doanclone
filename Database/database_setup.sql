@@ -192,3 +192,51 @@ ALTER TABLE yeuthich
 ALTER TABLE thanhtoan
   ADD PRIMARY KEY (Id),
   ADD KEY DonHangId (DonHangId);
+
+-- khoa ngoai
+
+-- sanpham
+ALTER TABLE sanpham
+  ADD CONSTRAINT sanpham_ibfk_1
+  FOREIGN KEY (DanhMucId) REFERENCES danhmuc(Id);
+
+-- donhang
+ALTER TABLE donhang
+  ADD CONSTRAINT donhang_ibfk_1
+  FOREIGN KEY (NguoiDungId) REFERENCES nguoidung(Id),
+  ADD CONSTRAINT fk_DonHang_KhuyenMai
+  FOREIGN KEY (MaKhuyenMai) REFERENCES khuyenmai(MaCode)
+  ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- chitietdonhang
+ALTER TABLE chitietdonhang
+  ADD CONSTRAINT chitietdonhang_ibfk_1
+  FOREIGN KEY (DonHangId) REFERENCES donhang(Id),
+  ADD CONSTRAINT chitietdonhang_ibfk_2
+  FOREIGN KEY (SanPhamId) REFERENCES sanpham(Id);
+
+-- giohang
+ALTER TABLE giohang
+  ADD CONSTRAINT giohang_ibfk_1
+  FOREIGN KEY (NguoiDungId) REFERENCES nguoidung(Id),
+  ADD CONSTRAINT giohang_ibfk_2
+  FOREIGN KEY (SanPhamId) REFERENCES sanpham(Id);
+
+-- danhgia
+ALTER TABLE danhgia
+  ADD CONSTRAINT fk_danhgia_nguoidung
+  FOREIGN KEY (NguoiDungId) REFERENCES nguoidung(Id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_danhgia_sanpham
+  FOREIGN KEY (SanPhamId) REFERENCES sanpham(Id) ON DELETE CASCADE;
+
+-- yeuthich
+ALTER TABLE yeuthich
+  ADD CONSTRAINT fk_yeuthich_nguoidung
+  FOREIGN KEY (NguoiDungId) REFERENCES nguoidung(Id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_yeuthich_sanpham
+  FOREIGN KEY (SanPhamId) REFERENCES sanpham(Id) ON DELETE CASCADE;
+
+-- thanhtoan
+ALTER TABLE thanhtoan
+  ADD CONSTRAINT thanhtoan_ibfk_1
+  FOREIGN KEY (DonHangId) REFERENCES donhang(Id);
