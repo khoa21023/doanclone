@@ -136,3 +136,59 @@ CREATE TABLE [yeuthich] (
     [NgayThem] datetime DEFAULT GETDATE()
 );
 GO
+-- nguoidung
+ALTER TABLE nguoidung
+  ADD PRIMARY KEY (Id),
+  ADD UNIQUE KEY Email (Email);
+
+-- danhmuc
+ALTER TABLE danhmuc
+  ADD PRIMARY KEY (Id);
+
+-- khuyenmai
+ALTER TABLE khuyenmai
+  ADD PRIMARY KEY (Id),
+  ADD UNIQUE KEY MaCode (MaCode);
+
+-- revoked_tokens
+ALTER TABLE revoked_tokens
+  ADD PRIMARY KEY (token);
+
+-- sanpham
+ALTER TABLE sanpham
+  ADD PRIMARY KEY (Id),
+  ADD KEY DanhMucId (DanhMucId);
+
+-- donhang
+ALTER TABLE donhang
+  ADD PRIMARY KEY (Id),
+  ADD KEY NguoiDungId (NguoiDungId),
+  ADD KEY idx_MaKhuyenMai (MaKhuyenMai);
+
+-- chitietdonhang
+ALTER TABLE chitietdonhang
+  ADD PRIMARY KEY (Id),
+  ADD KEY DonHangId (DonHangId),
+  ADD KEY SanPhamId (SanPhamId);
+
+-- giohang
+ALTER TABLE giohang
+  ADD PRIMARY KEY (Id),
+  ADD KEY NguoiDungId (NguoiDungId),
+  ADD KEY SanPhamId (SanPhamId);
+
+-- danhgia
+ALTER TABLE danhgia
+  ADD PRIMARY KEY (Id),
+  ADD KEY SanPhamId (SanPhamId),
+  ADD KEY NguoiDungId (NguoiDungId);
+
+-- yeuthich
+ALTER TABLE yeuthich
+  ADD PRIMARY KEY (NguoiDungId, SanPhamId),
+  ADD KEY SanPhamId (SanPhamId);
+
+-- thanhtoan
+ALTER TABLE thanhtoan
+  ADD PRIMARY KEY (Id),
+  ADD KEY DonHangId (DonHangId);
