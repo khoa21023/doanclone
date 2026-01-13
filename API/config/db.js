@@ -8,7 +8,6 @@ const db = mysql.createPool({
     password: process.env.DB_PASS,
     database: process.env.DB_NAME
 });
-
 export const execute = async (sql, params) => {
     const [rows] = await db.execute(sql, params);
     return rows;
