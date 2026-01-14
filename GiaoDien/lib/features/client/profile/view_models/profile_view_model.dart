@@ -2,32 +2,38 @@ import 'package:flutter/material.dart';
 import '../../../../data/models/user_profile.dart';
 
 class ProfileViewModel extends ChangeNotifier {
-  UserProfile? _user;
-  bool _isLoading = false;
+  // Dữ liệu giả lập để hiển thị giao diện
+  UserProfile profile = UserProfile(
+    id: "01",
+    name: "Người dùng",
+    email: "user@example.com",
+    phone: "0123456789",
+    address: "Địa chỉ của bạn",
+  );
 
-  UserProfile? get user => _user;
-  bool get isLoading => _isLoading;
+  bool isEditingProfile = false;
+  bool isChangingPassword = false;
 
-  ProfileViewModel() {
-    loadProfile();
-  }
-
-  Future<void> loadProfile() async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    _user = UserProfile(
-      id: '1',
-      name: 'Nguyễn Văn A',
-      email: 'client@gmail.com',
-      phone: '0909123456',
-      address: 'Ninh Kiều, Cần Thơ',
-      avatarUrl: 'https://i.pravatar.cc/150?img=3',
-    );
-
-    _isLoading = false;
+  void startEditProfile() {
+    isEditingProfile = true;
     notifyListeners();
   }
+
+  void cancelEditProfile() {
+    isEditingProfile = false;
+    notifyListeners();
+  }
+
+  void startChangePassword() {
+    isChangingPassword = true;
+    notifyListeners();
+  }
+
+  void cancelChangePassword() {
+    isChangingPassword = false;
+    notifyListeners();
+  }
+
+  // Tạm thời chưa viết logic Save
+  void saveProfile(UserProfile p) {}
 }
