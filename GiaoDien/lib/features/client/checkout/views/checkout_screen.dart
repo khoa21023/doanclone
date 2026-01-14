@@ -88,9 +88,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 10),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -119,14 +117,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const Divider(height: 30, thickness: 1, color: Colors.grey),
-
             _buildLabel("Địa chỉ nhận hàng"),
             _buildTextField(
               hint: "Ví dụ: 123 Đường Nguyễn Huệ",
               controller: _addressController,
             ),
             const SizedBox(height: 15),
-
             Row(
               children: [
                 Expanded(
@@ -157,12 +153,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             ),
             const SizedBox(height: 15),
-
             _buildLabel("Số điện thoại"),
             _buildTextField(hint: "0912 345 678", controller: _phoneController),
-
             const SizedBox(height: 30),
-
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -208,7 +201,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const Divider(height: 30, thickness: 1, color: Colors.grey),
-
                 _buildLabel("Chọn phương thức"),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -227,14 +219,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: Text("Thẻ tín dụng quốc tế (Visa/Master)"),
                         ),
                         DropdownMenuItem(
-                          value: 'momo',
-                          child: Text("Ví điện tử MoMo"),
-                        ),
-                        DropdownMenuItem(
-                          value: 'atm',
-                          child: Text("Thẻ ghi nợ nội địa"),
-                        ),
-                        DropdownMenuItem(
                           value: 'cod',
                           child: Text("Thanh toán khi nhận hàng (COD)"),
                         ),
@@ -247,13 +231,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 _buildDynamicPaymentContent(),
-
                 const SizedBox(height: 20),
-
                 _buildLabel("Mã khuyến mãi (nếu có)"),
                 Row(
                   children: [
@@ -282,9 +262,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -318,9 +296,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 16),
-
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -376,7 +352,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildDynamicPaymentContent() {
     switch (_selectedPaymentMethod) {
       case 'visa':
-      case 'atm':
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -411,35 +386,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ],
         );
-
-      case 'momo':
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.pink[50],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.qr_code, color: Colors.pink),
-                SizedBox(width: 10),
-                Text(
-                  "Mở App MoMo để quét mã thanh toán",
-                  style: TextStyle(color: Colors.pink),
-                ),
-              ],
-            ),
-          ),
-        );
-
       case 'cod':
         return const Text(
           "Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng.",
           style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
         );
-
       default:
         return const SizedBox.shrink();
     }
