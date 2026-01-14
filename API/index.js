@@ -10,6 +10,7 @@ import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js'; // BƯỚC 1: Thêm dòng này
+import promotionRoutes from './routes/promotionRoutes.js';
 
 dotenv.config();
 const app = express();
