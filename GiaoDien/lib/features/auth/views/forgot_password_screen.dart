@@ -4,6 +4,9 @@ import '../view_models/forgot_password_view_model.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   ForgotPasswordScreen({super.key});
 
@@ -12,6 +15,11 @@ class ForgotPasswordScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => ForgotPasswordViewModel(),
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Đặt lại mật khẩu"),
+          elevation: 0,
+          backgroundColor: Colors.blue.shade50,
+        ),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -32,8 +40,9 @@ class ForgotPasswordScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(32),
                   child: Consumer<ForgotPasswordViewModel>(
                     builder: (context, viewModel, child) {
+                      // Nếu đã đổi thành công -> Hiện thông báo
                       return viewModel.submitted
-                          ? _buildSuccessView(context, viewModel)
+                          ? _buildSuccessView(context)
                           : _buildFormView(context, viewModel);
                     },
                   ),
@@ -46,69 +55,7 @@ class ForgotPasswordScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSuccessView(
-    BuildContext context,
-    ForgotPasswordViewModel viewModel,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.green.shade100,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.check_circle, color: Colors.green, size: 48),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Kiểm tra email của bạn',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: const TextStyle(color: Colors.grey, fontSize: 16),
-            children: [
-              const TextSpan(
-                text: 'Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến ',
-              ),
-              TextSpan(
-                text: _emailController.text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 32),
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Quay về trang đăng nhập',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
+  // Giao diện Form nhập liệu
   Widget _buildFormView(
     BuildContext context,
     ForgotPasswordViewModel viewModel,
@@ -117,32 +64,23 @@ class ForgotPasswordScreen extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextButton.icon(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, size: 20),
-          label: const Text('Quay về trang đăng nhập'),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.grey.shade700,
-            padding: EdgeInsets.zero,
-            alignment: Alignment.centerLeft,
-          ),
-        ),
-        const SizedBox(height: 24),
         const Text(
           'Quên mật khẩu?',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Color(0xFF2563EB),
           ),
         ),
         const SizedBox(height: 8),
         const Text(
-          'Nhập địa chỉ email của bạn và chúng tôi sẽ gửi hướng dẫn để bạn đặt lại mật khẩu.',
-          style: TextStyle(color: Colors.grey, fontSize: 15),
+          'Nhập email và mật khẩu mới để khôi phục tài khoản.',
+          style: TextStyle(color: Colors.grey),
         ),
         const SizedBox(height: 32),
-        const Text('Email', style: TextStyle(fontWeight: FontWeight.w500)),
+
+        // 1. Nhập Email
+        const Text("Email", style: TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         TextField(
           controller: _emailController,
@@ -152,6 +90,58 @@ class ForgotPasswordScreen extends StatelessWidget {
             prefixIcon: Icon(Icons.mail_outline, color: Colors.grey),
           ),
         ),
+        const SizedBox(height: 16),
+
+        // 2. Nhập Mật khẩu mới
+        const Text(
+          "Mật khẩu mới",
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _newPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            hintText: '••••••••',
+            prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 3. Xác nhận mật khẩu mới
+        const Text(
+          "Nhập lại mật khẩu",
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _confirmPasswordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            hintText: '••••••••',
+            prefixIcon: Icon(Icons.lock_reset, color: Colors.grey),
+          ),
+        ),
+
+        // Hiển thị lỗi từ API hoặc Validate
+        if (viewModel.errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                viewModel.errorMessage!,
+                style: TextStyle(color: Colors.red.shade700),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
@@ -159,7 +149,32 @@ class ForgotPasswordScreen extends StatelessWidget {
           child: ElevatedButton(
             onPressed: viewModel.isLoading
                 ? null
-                : () => viewModel.sendResetLink(_emailController.text),
+                : () {
+                    // Validate cơ bản tại Client
+                    if (_newPasswordController.text !=
+                        _confirmPasswordController.text) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Mật khẩu xác nhận không khớp!"),
+                        ),
+                      );
+                      return;
+                    }
+                    if (_newPasswordController.text.length < 6) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Mật khẩu phải trên 6 ký tự!"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Gọi hàm xử lý
+                    viewModel.resetPassword(
+                      email: _emailController.text,
+                      newPassword: _newPasswordController.text,
+                    );
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
@@ -177,9 +192,55 @@ class ForgotPasswordScreen extends StatelessWidget {
                     ),
                   )
                 : const Text(
-                    'Gửi link khôi phục',
+                    'Đổi mật khẩu',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Giao diện Thông báo thành công
+  Widget _buildSuccessView(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.check_circle_outline, color: Colors.green, size: 64),
+        const SizedBox(height: 16),
+        const Text(
+          'Thành công!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Mật khẩu của bạn đã được cập nhật.\nHãy đăng nhập lại.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.grey),
+        ),
+        const SizedBox(height: 32),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Quay về màn hình Login
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Quay về Đăng nhập',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ],
