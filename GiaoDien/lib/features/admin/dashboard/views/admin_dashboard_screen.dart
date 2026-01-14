@@ -22,6 +22,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Tự động load dữ liệu khi vào màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminDashboardViewModel>(context, listen: false).loadOrders();
+    });
   }
 
   @override
