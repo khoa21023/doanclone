@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart'; // Cần thêm intl vào pubspec.yaml
 import '../view_models/admin_dashboard_view_model.dart';
-import '../../promotions/views/promotions_screen.dart';
-import '../../order/views/admin_order_detail_screen.dart';
 import '../../../../data/models/order.dart';
-import '../../../auth/views/login_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -21,17 +19,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Tự động load dữ liệu khi vào màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdminDashboardViewModel>(context, listen: false).loadOrders();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+
+    // Tính toán kích thước cho Grid
     double screenWidth = MediaQuery.of(context).size.width;
-    double itemHeight = 110.0;
-    double itemWidth = (screenWidth - 32 - 12) / 2;
+    // Điều chỉnh aspect ratio để thẻ không bị lỗi layout
+    double itemWidth = (screenWidth - 48) / 2; // trừ padding
+    double itemHeight = 100.0;
     double aspectRatio = itemWidth / itemHeight;
 
     return ChangeNotifierProvider(
-      create: (_) => AdminDashboardViewModel()..loadOrders(),
+      create: (_) =>
+          AdminDashboardViewModel(), // (Hoặc dùng provider có sẵn từ main)
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF2563EB),
@@ -39,143 +47,149 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Admin Dashboard',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                'Dashboard',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               Text(
-                'Mobile Tech CT',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                'Admin Portal',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               ),
             ],
           ),
           actions: [
-            TextButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PromotionsScreen()),
-              ),
-              icon: const Icon(Icons.local_offer, color: Colors.white),
-              label: const Text(
-                'Khuyến mãi',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
             IconButton(
               icon: const Icon(Icons.logout),
-              color: Colors.white,
-              tooltip: "Đăng xuất",
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text("Đăng xuất"),
-                      content: const Text(
-                        "Bạn có chắc chắn muốn đăng xuất quyền Admin?",
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text("Hủy"),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                        TextButton(
-                          child: const Text(
-                            "Đồng ý",
-                            style: TextStyle(color: Colors.red),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginScreen(),
-                              ),
-                              (route) => false,
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
+                Navigator.pop(context);
               },
             ),
-            const SizedBox(width: 8),
           ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48),
-            child: Consumer<AdminDashboardViewModel>(
-              builder: (context, viewModel, _) {
-                return TabBar(
-                  controller: _tabController,
-                  indicatorColor: Colors.white,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white60,
-                  tabs: [
-                    Tab(text: 'Đã đặt (${viewModel.placedCount})'),
-                    Tab(text: 'Đang giao (${viewModel.processingCount})'),
-                    Tab(text: 'Đã giao (${viewModel.completedCount})'),
-                  ],
-                );
-              },
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
+            unselectedLabelStyle: const TextStyle(fontSize: 14),
+            tabs: const [
+              Tab(text: 'Tổng quan'),
+              Tab(text: 'Đơn hàng'),
+              Tab(text: 'Sản phẩm'),
+            ],
           ),
         ),
         body: Consumer<AdminDashboardViewModel>(
           builder: (context, viewModel, child) {
-            return Column(
+            if (viewModel.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (viewModel.errorMessage != null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      viewModel.errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: viewModel.loadOrders,
+                      child: const Text("Thử lại"),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return TabBarView(
+              controller: _tabController,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.blue.shade50,
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: aspectRatio,
-                    children: [
-                      _buildStatCard(
-                        'Tổng đơn hàng',
-                        '${viewModel.totalOrders}',
-                        Icons.inventory_2_outlined,
-                        Colors.blue,
-                      ),
-                      _buildStatCard(
-                        'Doanh thu',
-                        '${viewModel.totalRevenue.toStringAsFixed(0)} \$',
-                        Icons.attach_money,
-                        Colors.green,
-                      ),
-                      _buildStatCard(
-                        'Đơn hàng mới',
-                        '${viewModel.placedCount}',
-                        Icons.trending_up,
-                        Colors.orange,
-                      ),
-                      _buildStatCard(
-                        'Đang xử lý',
-                        '${viewModel.processingCount}',
-                        Icons.local_shipping_outlined,
-                        Colors.purple,
-                      ),
-                    ],
+                // --- TAB 1: TỔNG QUAN ---
+                RefreshIndicator(
+                  onRefresh: viewModel.loadOrders,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: aspectRatio,
+                          children: [
+                            _buildStatCard(
+                              'Doanh thu',
+                              currencyFormat.format(viewModel.totalRevenue),
+                              Colors.blue,
+                              Icons.attach_money,
+                            ),
+                            _buildStatCard(
+                              'Tổng đơn',
+                              '${viewModel.totalOrders}',
+                              Colors.orange,
+                              Icons.shopping_bag_outlined,
+                            ),
+                            _buildStatCard(
+                              'Chờ xác nhận',
+                              '${viewModel.placedCount}',
+                              Colors.purple,
+                              Icons.new_releases_outlined,
+                            ),
+                            _buildStatCard(
+                              'Đang giao',
+                              '${viewModel.processingCount}',
+                              Colors.teal,
+                              Icons.local_shipping_outlined,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Đơn hàng mới nhất',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (viewModel.orders.isEmpty)
+                          const Text(
+                            "Chưa có đơn hàng nào",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ...viewModel.orders
+                            .take(5)
+                            .map((order) => _buildOrderCard(order)),
+                      ],
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildOrderList(context, viewModel, 'placed'),
-                      _buildOrderList(context, viewModel, 'processing'),
-                      _buildOrderList(context, viewModel, 'completed'),
-                    ],
-                  ),
+
+                // --- TAB 2: DANH SÁCH ĐƠN HÀNG ---
+                RefreshIndicator(
+                  onRefresh: viewModel.loadOrders,
+                  child: viewModel.orders.isEmpty
+                      ? const Center(child: Text("Chưa có dữ liệu"))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: viewModel.orders.length,
+                          itemBuilder: (context, index) {
+                            return _buildOrderCard(viewModel.orders[index]);
+                          },
+                        ),
+                ),
+
+                // --- TAB 3: SẢN PHẨM ---
+                const Center(
+                  child: Text("Tính năng quản lý sản phẩm đang phát triển"),
                 ),
               ],
             );
@@ -188,93 +202,54 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   Widget _buildStatCard(
     String title,
     String value,
+    MaterialColor color,
     IconData icon,
-    Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
-        ],
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.shade100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
-                child: Text(
-                  title,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                  overflow: TextOverflow.ellipsis,
+              Icon(icon, color: color.shade700, size: 24),
+              const Spacer(),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: color.shade900,
                 ),
               ),
-              Icon(icon, color: color, size: 24),
             ],
           ),
+          const SizedBox(height: 8),
           Text(
-            value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            title,
+            style: TextStyle(
+              color: color.shade700,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOrderList(
-    BuildContext context,
-    AdminDashboardViewModel viewModel,
-    String status,
-  ) {
-    final orders = viewModel.getOrdersByStatus(status);
-    if (orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 8),
-            Text(
-              "Không có đơn hàng nào",
-              style: TextStyle(color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      );
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (ctx, index) {
-        final order = orders[index];
-        return GestureDetector(
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AdminOrderDetailScreen(order: order),
-              ),
-            );
-            viewModel.loadOrders();
-          },
-          child: _buildOrderCard(context, order, status),
-        );
-      },
-    );
-  }
-
-  Widget _buildOrderCard(BuildContext context, Order order, String status) {
+  Widget _buildOrderCard(Order order) {
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     return Card(
-      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -283,64 +258,37 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  order.id,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  '#${order.id}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                _buildStatusBadge(status),
+                _buildStatusBadge(order.status, order.statusInVietnamese),
               ],
             ),
-            const SizedBox(height: 8),
+            const Divider(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  order.userName,
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                Text(
-                  '${order.total} VND',
-                  style: const TextStyle(
-                    color: Color(0xFF2563EB),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 16),
-            if (order.items.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.shopping_bag_outlined,
-                      size: 16,
-                      color: Colors.grey,
+                    // SỬA: Dùng userName thay vì customerName
+                    Text(
+                      order.userName,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "${order.items[0].quantity}x ${order.items[0].productName}${order.items.length > 1 ? '...' : ''}",
-                        style: const TextStyle(fontSize: 13),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    const SizedBox(height: 4),
+                    // SỬA: Dùng createdAt thay vì date
+                    Text(
+                      DateFormat('dd/MM/yyyy HH:mm').format(order.createdAt),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
-              ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
                 Text(
-                  'Xem chi tiết →',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                  currencyFormat.format(order.total),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    color: Color(0xFF2563EB),
                   ),
                 ),
               ],
@@ -351,43 +299,44 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(String code, String label) {
     Color bgColor;
     Color textColor;
-    String text;
-    switch (status) {
+
+    switch (code) {
       case 'placed':
-        bgColor = Colors.yellow.shade100;
+        bgColor = Colors.orange.shade100;
         textColor = Colors.orange.shade800;
-        text = 'Đã đặt';
         break;
       case 'processing':
         bgColor = Colors.blue.shade100;
         textColor = Colors.blue.shade800;
-        text = 'Đang giao';
         break;
       case 'completed':
         bgColor = Colors.green.shade100;
         textColor = Colors.green.shade800;
-        text = 'Đã giao';
+        break;
+      case 'cancelled':
+        bgColor = Colors.red.shade100;
+        textColor = Colors.red.shade800;
         break;
       default:
         bgColor = Colors.grey.shade100;
         textColor = Colors.black;
-        text = status;
     }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        text,
+        label,
         style: TextStyle(
-          fontSize: 12,
           color: textColor,
           fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );
