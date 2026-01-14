@@ -176,13 +176,13 @@ class LoginScreen extends StatelessWidget {
                                           );
                                         } else {
                                           // Nếu là Customer (hoặc khác) -> Vào trang chủ
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const HomeScreen(),
-                                            ),
-                                          );
+                                          // Navigator.pushReplacement(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (_) =>
+                                          //         const HomeScreen(),
+                                          //   ),
+                                          // );
                                         }
                                       }
                                     },
