@@ -10,7 +10,6 @@ import '../../../../features/client/cart/views/cart_screen.dart';
 
 import '../../product/views/product_detail_screen.dart';
 import '../../wishlist/views/wishlist_screen.dart';
-import '../../product/views/custom_design_screen.dart';
 import '../../profile/views/profile_screen.dart';
 import '../../order/views/order_history_screen.dart';
 import '../../../auth/views/login_screen.dart';
@@ -429,37 +428,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       "Xiaomi",
                       isSelected: _selectedCaseBrand == "Xiaomi",
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      child: ElevatedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CustomDesignScreen(),
-                          ),
-                        ).then((_) => setState(() {})),
-                        icon: const Icon(Icons.brush, size: 16),
-                        label: const Text(
-                          "Tự thiết kế",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepOrange,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
             ],
+            // --------------------------------------------------------------------------
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
