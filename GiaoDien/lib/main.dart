@@ -5,6 +5,7 @@ import 'data/providers/wishlist_provider.dart';
 import 'features/auth/view_models/login_view_model.dart';
 import 'features/auth/view_models/signup_view_model.dart';
 import 'features/auth/views/login_screen.dart';
+import 'features/admin/promotions/view_models/promotions_view_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,13 +18,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // --- DATA PROVIDERS (Dữ liệu dùng chung toàn app) ---
+        // --- DATA PROVIDERS ---
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
 
-        // --- AUTH PROVIDERS (Nếu muốn dùng chung, hoặc khai báo tại màn hình cũng được) ---
+        // --- AUTH PROVIDERS ---
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
+
+        // --- THÊM DÒNG NÀY ĐỂ SỬA LỖI MÀN HÌNH ĐỎ ---
+        ChangeNotifierProvider(create: (_) => PromotionsViewModel()),
+
+        // GỢI Ý: Nếu bạn có ProductViewModel hay OrderViewModel dùng cho Dashboard
+        // thì cũng nên thêm luôn vào đây để tránh lỗi tương tự ở các tab khác:
+        // ChangeNotifierProvider(create: (_) => ProductViewModel()),
+        // ChangeNotifierProvider(create: (_) => OrderViewModel()),
       ],
       child: MaterialApp(
         title: 'Mobile Tech CT',

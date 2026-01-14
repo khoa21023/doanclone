@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-// Đảm bảo import đúng đường dẫn file model Order mới
 import '../../../../data/models/order.dart';
 
 class AdminDashboardViewModel extends ChangeNotifier {
@@ -13,6 +12,20 @@ class AdminDashboardViewModel extends ChangeNotifier {
   List<Order> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Xóa token và các dữ liệu user lưu tạm
+      await prefs.remove('token');
+      await prefs.remove('user_data');
+
+      _orders = [];
+      notifyListeners();
+    } catch (e) {
+      print("Lỗi logout: $e");
+    }
+  }
 
   // Gọi API lấy danh sách đơn hàng
   Future<void> loadOrders() async {
