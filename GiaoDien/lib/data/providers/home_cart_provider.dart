@@ -13,26 +13,16 @@ class CartProvider with ChangeNotifier {
     return total;
   }
 
-  // Cập nhật hàm addItem để nhận cả thông tin Custom
-  void addItem(Product product, {int quantity = 1, bool isCustom = false, Uint8List? img, String? text, String? sticker}) {
-    // Nếu là hàng thiết kế riêng -> Luôn thêm mới, không cộng dồn số lượng
-    if (isCustom) {
-      _items.add(CartItem(
-        product: product,
-        quantity: quantity,
-        isCustomDesign: true,
-        customImage: img,
-        customText: text,
-        sticker: sticker,
-      ));
+  void addItem(Product product, {int quantity = 1}) {
+    // Kiểm tra xem sản phẩm đã có trong giỏ 
+    final index = _items.indexWhere((item) => item.product.id == product.id);
+
+    if (index >= 0) {
+      // Nếu có  -> Tăng số lượng
+      _items[index].quantity += quantity;
     } else {
-      // Hàng thường -> Cộng dồn nếu trùng ID
-      final index = _items.indexWhere((item) => item.product.id == product.id && !item.isCustomDesign);
-      if (index >= 0) {
-        _items[index].quantity += quantity;
-      } else {
-        _items.add(CartItem(product: product, quantity: quantity));
-      }
+      // Nếu chưa có -> Thêm mới
+      _items.add(CartItem(product: product, quantity: quantity));
     }
     notifyListeners();
   }
