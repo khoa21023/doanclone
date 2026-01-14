@@ -125,8 +125,7 @@ class SignupScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               TextField(
                                 controller: _confirmPasswordController,
-                                obscureText: viewModel
-                                    .obscurePassword, 
+                                obscureText: viewModel.obscurePassword,
                                 decoration: const InputDecoration(
                                   hintText: '••••••••',
                                   prefixIcon: Icon(
@@ -172,6 +171,7 @@ class SignupScreen extends StatelessWidget {
                                         confirmPassword:
                                             _confirmPasswordController.text,
                                         name: _nameController.text,
+                                        phone: _phoneController.text,
                                       );
 
                                       if (success && context.mounted) {
@@ -182,10 +182,10 @@ class SignupScreen extends StatelessWidget {
                                             content: Text(
                                               'Đăng ký thành công! Hãy đăng nhập.',
                                             ),
+                                            backgroundColor: Colors.green,
                                           ),
                                         );
-                                        // Quay về trang Login sau khi đăng ký thành công
-                                        Navigator.pop(context); 
+                                        Navigator.pop(context);
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
