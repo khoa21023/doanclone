@@ -56,7 +56,9 @@ class SignupViewModel extends ChangeNotifier {
       // - Nếu chạy máy ảo Android: dùng 10.0.2.2
       // - Nếu chạy máy ảo iOS: dùng localhost
       // - Nếu chạy trên điện thoại thật: dùng IP Wifi của máy tính (VD: 192.168.1.10)
-      final url = Uri.parse('http://10.0.2.2:3000/api/users/register');
+      final url = Uri.parse(
+        'https://mobile-tech-ct.onrender.com/api/users/register',
+      );
 
       final response = await http.post(
         url,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/login_view_model.dart';
-import 'signup_screen.dart'; 
-import 'forgot_password_screen.dart'; 
+import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
 import '../../admin/dashboard/views/admin_dashboard_screen.dart';
 import '../../client/home/views/home_screen.dart';
 
@@ -88,7 +88,8 @@ class LoginScreen extends StatelessWidget {
                                           : Icons.visibility_outlined,
                                       color: Colors.grey,
                                     ),
-                                    onPressed: viewModel.togglePasswordVisibility,
+                                    onPressed:
+                                        viewModel.togglePasswordVisibility,
                                   ),
                                 ),
                               ),
@@ -143,30 +144,43 @@ class LoginScreen extends StatelessWidget {
                               onPressed: viewModel.isLoading
                                   ? null
                                   : () async {
-                                      bool success = await viewModel.login(
+                                      // Gọi hàm login và nhận về Role
+                                      String? role = await viewModel.login(
                                         _emailController.text,
                                         _passwordController.text,
                                       );
 
-                                      if (success && context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                      // Kiểm tra kết quả
+                                      if (role != null && context.mounted) {
+                                        // Hiển thị thông báo chào mừng
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('Đăng nhập thành công!'),
+                                            content: Text(
+                                              'Đăng nhập thành công!',
+                                            ),
+                                            backgroundColor: Colors.green,
                                           ),
                                         );
 
-                                        if (_emailController.text == 'admin@gmail.com') {
+                                        // Điều hướng dựa trên Role
+                                        if (role == 'Admin') {
+                                          // Nếu là Admin -> Vào trang quản trị
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const AdminDashboardScreen(),
+                                              builder: (_) =>
+                                                  const AdminDashboardScreen(),
                                             ),
                                           );
                                         } else {
+                                          // Nếu là Customer (hoặc khác) -> Vào trang chủ
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const HomeScreen(),
+                                              builder: (_) =>
+                                                  const HomeScreen(),
                                             ),
                                           );
                                         }
@@ -197,7 +211,6 @@ class LoginScreen extends StatelessWidget {
                                     ),
                             ),
                           ),
-
                           const SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
