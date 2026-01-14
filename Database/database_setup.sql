@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 13, 2026 lúc 11:43 AM
+-- Thời gian đã tạo: Th1 13, 2026 lúc 03:10 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -298,7 +298,7 @@ CREATE TABLE `thanhtoan` (
   `Id` varchar(20) NOT NULL,
   `DonHangId` varchar(20) NOT NULL,
   `PhuongThuc` varchar(50) DEFAULT 'COD',
-  `MaGiaoDichNganHang` varchar(100) DEFAULT NULL,
+  `MaGiaoDich` varchar(100) DEFAULT NULL,
   `SoTienThanhToan` decimal(18,0) DEFAULT NULL,
   `NgayThanhToan` datetime DEFAULT current_timestamp(),
   `GhiChu` text DEFAULT NULL,
@@ -309,7 +309,7 @@ CREATE TABLE `thanhtoan` (
 -- Đang đổ dữ liệu cho bảng `thanhtoan`
 --
 
-INSERT INTO `thanhtoan` (`Id`, `DonHangId`, `PhuongThuc`, `MaGiaoDichNganHang`, `SoTienThanhToan`, `NgayThanhToan`, `GhiChu`, `TrangThai`) VALUES
+INSERT INTO `thanhtoan` (`Id`, `DonHangId`, `PhuongThuc`, `MaGiaoDich`, `SoTienThanhToan`, `NgayThanhToan`, `GhiChu`, `TrangThai`) VALUES
 ('TT01', 'DH01', 'Banking', NULL, 5830000, '2026-01-08 14:01:01', NULL, 'ThanhCong'),
 ('TT02', 'DH03', 'Banking', NULL, 7790000, '2026-01-08 14:01:01', NULL, 'ThanhCong'),
 ('TT03', 'DH06', 'Banking', NULL, 2170000, '2026-01-08 14:01:01', NULL, 'ThanhCong'),
