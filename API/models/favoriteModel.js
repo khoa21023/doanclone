@@ -1,5 +1,4 @@
-import db from '../config/db.js';
-
+import { execute } from '../config/db.js';
 const favoriteModel = {
     // 1. Lấy danh sách: JOIN với bảng sanpham để lấy thông tin chi tiết
     getFavoritesByUserId: async (userId) => {
@@ -9,29 +8,26 @@ const favoriteModel = {
             JOIN sanpham sp ON yt.SanPhamId = sp.Id
             WHERE yt.NguoiDungId = ?
             ORDER BY yt.NgayThem DESC`;
-        const [rows] = await db.execute(sql, [userId]);
-        return rows;
+        return await execute(sql, [userId]); 
     },
 
-    // 2. Kiểm tra tồn tại: Dùng cặp NguoiDungId và SanPhamId
+    // 2. Kiểm tra tồn tại
     checkExist: async (userId, productId) => {
         const sql = "SELECT * FROM yeuthich WHERE NguoiDungId = ? AND SanPhamId = ?";
-        const [rows] = await db.execute(sql, [userId, productId]);
-        return rows[0];
+        const rows = await execute(sql, [userId, productId]);
+        return rows.length > 0;
     },
 
-    // 3. Thêm mới: Chỉ chèn NguoiDungId và SanPhamId
+    // 3. Thêm mới
     create: async (userId, productId) => {
         const sql = "INSERT INTO yeuthich (NguoiDungId, SanPhamId) VALUES (?, ?)";
-        const [result] = await db.execute(sql, [userId, productId]);
-        return result;
+        return await execute(sql, [userId, productId]);
     },
 
-    // 4. Xóa: Dựa trên cặp ID người dùng và sản phẩm
+    // 4. Xóa
     delete: async (userId, productId) => {
         const sql = "DELETE FROM yeuthich WHERE NguoiDungId = ? AND SanPhamId = ?";
-        const [result] = await db.execute(sql, [userId, productId]);
-        return result;
+        return await execute(sql, [userId, productId.toString()]); 
     }
 };
 

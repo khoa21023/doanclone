@@ -50,11 +50,15 @@ export const removeFromFavorite = async (req, res) => {
     try {
         const userId = req.user.id;
         const { productId } = req.params;
+        console.log(`Đang xóa SP: ${productId} của User: ${userId}`);
 
         const result = await favoriteModel.delete(userId, productId);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm trong danh sách yêu thích." });
+            return res.status(404).json({ 
+                success: false, 
+                message: "Không tìm thấy sản phẩm trong danh sách yêu thích." 
+            });
         }
 
         res.status(200).json({ success: true, message: "Đã xóa khỏi danh sách yêu thích." });

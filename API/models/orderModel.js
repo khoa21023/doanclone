@@ -1,83 +1,95 @@
-import { execute } from '../config/db.js';
+// models/orderModel.js
+import db, { execute } from '../config/db.js'; // Cần import thêm { execute }
 
-export const orderModel = {
-    // Admin lấy tất cả đơn hàng (có lọc status)
-    getAllOrdersForAdmin: async (status) => {
-        let sql = `SELECT dh.*, nd.HoTen 
-                   FROM donhang dh 
-                   JOIN nguoidung nd ON dh.NguoiDungId = nd.Id`;
+const orderModel = {
+    // 1. Lấy danh sách đơn hàng theo trạng thái (kèm tên người dùng) - Admin
+    getAllOrdersByStatus: async (status) => {
+        let sql = `SELECT dh.*, nd.HoTen, nd.Email, nd.SoDienThoai 
+                FROM donhang dh 
+                LEFT JOIN nguoidung nd ON dh.NguoiDungId = nd.Id`; 
+
         const params = [];
-
         if (status) {
-            sql += " WHERE dh.TrangThai = ?";
+            sql += " WHERE dh.TrangThaiDonHang = ?";
             params.push(status);
         }
-
         sql += " ORDER BY dh.NgayDat DESC";
-        const [rows] = await db.execute(sql, params);
-        return rows;
+        return await execute(sql, params);
     },
 
-    // User lấy đơn hàng của chính mình (có lọc status)
+    // 2. Lấy thông tin cơ bản của 1 đơn hàng
+    getById: async (id) => {
+        const rows = await execute("SELECT * FROM donhang WHERE Id = ?", [id]);
+        return rows[0];
+    },
+
+    // 3. Lấy chi tiết các sản phẩm trong đơn hàng
+    getDetails: async (orderId) => {
+        // Lưu ý: bảng sanpham là TenSP, bảng chitietdonhang là TenSanPham
+        const sql = `SELECT ctdh.*, sp.TenSanPham, sp.HinhAnh 
+                     FROM chitietdonhang ctdh 
+                     JOIN sanpham sp ON ctdh.SanPhamId = sp.Id 
+                     WHERE ctdh.DonHangId = ?`;
+        return await execute(sql, [orderId]);
+    },
+
+    // 4. Cập nhật trạng thái
+    updateStatus: async (id, status) => {
+        const sql = "UPDATE donhang SET TrangThaiDonHang = ? WHERE Id = ?";
+        return await execute(sql, [status, id]);
+    },
+
+    // 5. Thống kê số lượng đơn hàng theo nhiều trạng thái
+    countByStatuses: async (statuses) => {
+        const placeholders = statuses.map(() => '?').join(',');
+        const sql = `SELECT TrangThaiDonHang, COUNT(*) as SoLuong 
+                     FROM donhang 
+                     WHERE TrangThaiDonHang IN (${placeholders}) 
+                     GROUP BY TrangThaiDonHang`;
+        return await execute(sql, statuses);
+    },
+
+    // 6. Tính tổng tiền theo trạng thái (Sửa: ThanhTien -> TongTien)
+    getTotalAmountByStatus: async (status) => {
+        const sql = "SELECT SUM(ThanhTien) as TongDoanhThu FROM donhang WHERE TrangThaiDonHang = ?";
+        const rows = await execute(sql, [status]);
+        return rows[0].TongDoanhThu || 0;
+    },
+
+    // 7. User lấy đơn hàng của mình
     getOrdersByUser: async (userId, status) => {
         let sql = "SELECT * FROM donhang WHERE NguoiDungId = ?";
         const params = [userId];
-
-        // Nếu User có truyền status lên, ta thêm điều kiện AND vào SQL
         if (status) {
-            sql += " AND TrangThai = ?";
+            sql += " AND TrangThaiDonHang = ?";
             params.push(status);
         }
-
         sql += " ORDER BY NgayDat DESC";
-        const [rows] = await db.execute(sql, params);
-        return rows;
+        return await execute(sql, params);
     },
 
-    // 1. Tạo đơn hàng (Bảng donhang)
-    createOrder: async (data) => {
-        const { id, userId, ten, sdt, diaChi, tamTinh, phiShip, tongCuoi } = data;
-        const sql = `INSERT INTO donhang 
-            (Id, NguoiDungId, TenNguoiNhan, SdtNguoiNhan, DiaChiGiao, TongTienHang, PhiShip, ThanhTien, TrangThaiDonHang, TrangThaiThanhToan, NgayDat) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'ChoXacNhan', 0, NOW())`;
-        return await execute(sql, [id, userId, ten, sdt, diaChi, tamTinh, phiShip, tongCuoi]);
+    // 8. Lấy số lượng đơn hàng theo từng trạng thái của 1 User
+    countStatusByUser: async (userId) => {
+        const sql = `
+            SELECT TrangThaiDonHang, COUNT(*) as SoLuong 
+            FROM donhang 
+            WHERE NguoiDungId = ? 
+            GROUP BY TrangThaiDonHang`;
+        return await execute(sql, [userId]);
     },
 
-    // 2. Lưu chi tiết đơn hàng (Bảng chitietdonhang)
-    createOrderDetail: async (d) => {
-        const sql = `INSERT INTO chitietdonhang (Id, DonHangId, SanPhamId, TenSanPham, SoLuong, GiaLucMua, ThanhTien) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        return await execute(sql, [d.id, d.orderId, d.productId, d.name, d.quantity, d.price, d.subtotal]);
+    // 9. Hủy đơn hàng
+    cancelOrder: async (orderId, userId) => {
+        const sql = "UPDATE donhang SET TrangThaiDonHang = 'Đã Hủy' WHERE Id = ? AND NguoiDungId = ?";
+        return await execute(sql, [orderId, userId]);
     },
 
-    // 3. Lưu thông tin thanh toán (Bảng thanhtoan)
-    createPayment: async (p) => {
-        const sql = `INSERT INTO thanhtoan (Id, DonHangId, PhuongThuc, SoTienThanhToan, NgayThanhToan, TrangThai) 
-                     VALUES (?, ?, ?, ?, NOW(), ?)`;
-        const status = p.method === 'COD' ? 'ChoXuLy' : 'ThanhCong';
-        return await execute(sql, [p.id, p.orderId, p.method, p.amount, status]);
-    },
-
-    // Lấy thông tin các sản phẩm đã chọn từ giỏ hàng để tính tiền
-    getSelectedItems: async (cartItemIds, userId) => {
-        const placeholders = cartItemIds.map(() => "?").join(",");
-        const sql = `SELECT gh.Id as CartId, gh.SoLuong, sp.Id as SanPhamId, sp.GiaBan, sp.TenSanPham 
-                     FROM giohang gh JOIN sanpham sp ON gh.SanPhamId = sp.Id 
-                     WHERE gh.Id IN (${placeholders}) AND gh.NguoiDungId = ?`;
-        return await execute(sql, [...cartItemIds, userId]);
-    },
-
-    // Cập nhật tồn kho và xóa giỏ hàng
-    decreaseStock: async (pId, qty) => {
-        return await execute("UPDATE sanpham SET TonKho = TonKho - ? WHERE Id = ?", [qty, pId]);
-    },
-
-    removeFromCart: async (cartId, userId) => {
-        return await execute("DELETE FROM giohang WHERE Id = ? AND NguoiDungId = ?", [cartId, userId]);
-    },
-
-    updateStatus: async (orderId, status) => {
-        const sql = "UPDATE donhang SET TrangThaiDonHang = ? WHERE Id = ?";
-        return await execute(sql, [status, orderId]);
+    // 10. Kiểm tra trạng thái hiện tại (Sửa property truy cập: TrangThai -> TrangThaiDonHang)
+    getOrderStatus: async (orderId, userId) => {
+        const sql = "SELECT TrangThaiDonHang FROM donhang WHERE Id = ? AND NguoiDungId = ?";
+        const rows = await execute(sql, [orderId, userId]);
+        return rows[0] ? rows[0].TrangThaiDonHang : null; // Phải dùng chính xác tên cột
     }
 };
+
+export default orderModel;

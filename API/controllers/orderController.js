@@ -1,117 +1,83 @@
-import { orderModel } from '../models/orderModel.js';
+import orderModel from '../models/orderModel.js';
+import db from '../config/db.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const PayOSLib = require("@payos/node");
+const PayOS = PayOSLib.PayOS || PayOSLib.default || PayOSLib;
+// --------------------
 
-// Xem trước đơn hàng (Màn hình 1: Xác nhận thông tin)
-export const previewSelectedItems = async (req, res) => {
+const payos = new PayOS(
+    process.env.PAYOS_CLIENT_ID,
+    process.env.PAYOS_API_KEY,
+    process.env.PAYOS_CHECKSUM_KEY
+);
+
+// Lấy tất cả đơn hàng (Admin)
+export const getAllOrders = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { cartItemIds } = req.body;
-
-        if (!cartItemIds || cartItemIds.length === 0) {
-            return res.status(400).json({ success: false, message: "Bạn chưa chọn sản phẩm nào." });
-        }
-
-        const items = await orderModel.getSelectedItems(cartItemIds, userId);
-        let totalProvision = 0;
-        const detailItems = items.map(item => {
-            const subtotal = item.SoLuong * item.GiaBan;
-            totalProvision += subtotal;
-            return { ...item, ThanhTien: subtotal };
-        });
-
-        res.json({
-            success: true,
-            data: { products: detailItems, totalAmount: totalProvision, phiShip: 5000 }
-        });
+        const { status } = req.query; // Ví dụ: ?status=Đã Đặt
+        const orders = await orderModel.getAllOrdersByStatus(status);
+        res.status(200).json({ success: true, data: orders });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Đặt hàng cuối cùng (Màn hình 3: Sau khi chọn phương thức thanh toán)
-export const checkoutSelected = async (req, res) => {
+// Lấy chi tiết đơn hàng (Admin & User)
+export const getOrderDetails = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { cartItemIds, name, phone, address, paymentMethod } = req.body;
+        const { id } = req.params;
+        const order = await orderModel.getById(id);
+        if (!order) return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng" });
 
-        // 1. Kiểm tra sản phẩm
-        const items = await orderModel.getSelectedItems(cartItemIds, userId);
-        
-        // LOGIC YÊU CẦU: Nếu không có sản phẩm thì phí ship = 0 và dừng lại
-        if (!items || items.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Giỏ hàng rỗng hoặc không hợp lệ.",
-                phiShip: 0,
-                tongCuoi: 0
-            });
-        }
-
-        // 2. Tính toán (Lúc này chắc chắn items.length > 0)
-        let tamTinh = 0;
-        items.forEach(i => tamTinh += i.GiaBan * i.SoLuong);
-        
-        const phiShip = 30000; // Có hàng mới tính ship
-        const tongCuoi = tamTinh + phiShip;
-        const orderId = 'DH' + Date.now();
-
-        // 3. Tạo đơn hàng & Chi tiết & Thanh toán
-        await orderModel.createOrder({ 
-            id: orderId, userId, ten: name, sdt: phone, 
-            diaChi: address, tamTinh, phiShip, tongCuoi 
-        });
-
-        for (const item of items) {
-            await orderModel.createOrderDetail({
-                id: 'CT' + Math.random().toString(36).substr(2, 9),
-                orderId, 
-                productId: item.SanPhamId, 
-                name: item.TenSanPham,
-                quantity: item.SoLuong, 
-                price: item.GiaBan, 
-                subtotal: item.GiaBan * item.SoLuong
-            });
-            
-            await orderModel.decreaseStock(item.SanPhamId, item.SoLuong);
-            
-            // SỬA LỖI TẠI ĐÂY: Trong Database của cậu là item.Id (xem ảnh image_77367a.png)
-            // Cũ của cậu là item.CartId (bị undefined nên gây lỗi 500)
-            await orderModel.removeFromCart(item.Id, userId); 
-        }
-
-        await orderModel.createPayment({
-            id: 'TT' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-            orderId, 
-            method: paymentMethod, 
-            amount: tongCuoi
-        });
-
-        res.status(200).json({ 
-            success: true, 
-            message: "Đặt hàng thành công!", 
-            orderId,
-            data: { tamTinh, phiShip, tongCuoi }
-        });
+        const products = await orderModel.getDetails(id);
+        res.status(200).json({ success: true, data: { ...order, products } });
     } catch (error) {
-        console.error("Lỗi Checkout:", error); // Log ra để cậu dễ debug
-        res.status(500).json({ success: false, message: "Lỗi hệ thống: " + error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-export const getAllOrders = async (req, res) => {
+// Cập nhật trạng thái (Admin)
+export const updateOrderStatus = async (req, res) => {
     try {
-        const { role, id: userId } = req.user; 
-        const { status } = req.query; // Lấy trạng thái từ URL (VD: ?status=ChoXacNhan)
+        const { id } = req.params;
+        const { status } = req.body; // "Đã Đặt", "Đang Giao", "Đã Giao"
 
-        let orders;
+        const result = await orderModel.updateStatus(id, status);
+        if (result.affectedRows === 0) return res.status(404).json({ success: false, message: "Thất bại" });
 
-        if (role === 'admin') {
-            // ADMIN: Lấy tất cả, nếu có status thì lọc theo status
-            orders = await orderModel.getAllOrdersForAdmin(status);
-        } else {
-            // USER: Lấy đơn của mình, nếu có status thì lọc theo status của mình
-            orders = await orderModel.getOrdersByUser(userId, status);
-        }
+        res.status(200).json({ success: true, message: "Cập nhật trạng thái thành công" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
+// Thống kê số lượng đơn 
+export const getOrderStats = async (req, res) => {
+    try {
+        const stats = await orderModel.countByStatuses(["Đã Đặt", "Đã Huỷ", "Đang Giao", "Đã Giao"]);
+        res.status(200).json({ success: true, data: stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Tổng tiền các đơn "Đã giao"
+export const getRevenuePending = async (req, res) => {
+    try {
+        const total = await orderModel.getTotalAmountByStatus("Đã Giao");
+        res.status(200).json({ success: true, totalRevenue: total });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+// 1. Lấy danh sách đơn hàng của User (Có thể lọc theo ?status=)
+export const getMyOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { status } = req.query;
+        const orders = await orderModel.getOrdersByUser(userId, status);
+        
         res.status(200).json({
             success: true,
             count: orders.length,
@@ -122,18 +88,154 @@ export const getAllOrders = async (req, res) => {
     }
 };
 
-// Cập nhật trạng thái đơn hàng (Ví dụ: Đã giao, Đã hủy)
-export const updateOrderStatus = async (req, res) => {
+// 2. Lấy số lượng đơn hàng theo trạng thái của User
+export const getMyOrderStatusStats = async (req, res) => {
     try {
-        const { orderId, status } = req.body;
-        
-        const result = await orderModel.updateStatus(orderId, status);
+        const userId = req.user.id;
+        const stats = await orderModel.countStatusByUser(userId);
         
         res.status(200).json({
             success: true,
-            message: "Cập nhật trạng thái thành công"
+            data: stats
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// 3. Hủy đơn hàng (Chỉ cho phép khi trạng thái là 'Đã Đặt')
+export const cancelMyOrder = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params; // ID đơn hàng
+
+        // Bước 1: Kiểm tra trạng thái hiện tại
+        const currentStatus = await orderModel.getOrderStatus(id, userId);
+
+        if (!currentStatus) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng." });
+        }
+
+        // Bước 2: Logic chặn hủy đơn
+        if (currentStatus === 'Đang Giao' || currentStatus === 'Đã Giao') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Không thể hủy đơn hàng khi đang ở trạng thái: ${currentStatus}` 
+            });
+        }
+        
+        if (currentStatus === 'Đã Hủy') {
+            return res.status(400).json({ success: false, message: "Đơn hàng này đã được hủy trước đó." });
+        }
+
+        // Bước 3: Tiến hành hủy
+        await orderModel.cancelOrder(id, userId);
+
+        res.status(200).json({
+            success: true,
+            message: "Hủy đơn hàng thành công."
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Đặt hàng và thanh toán
+export const createOrderAndPay = async (req, res) => {
+    const userId = req.user.id; 
+    // Thêm PhuongThucThanhToan để biết là COD hay VISA
+    const { TenNguoiNhan, SdtNguoiNhan, DiaChiGiao, PhuongThucThanhToan } = req.body;
+
+    try {
+        console.log("Bắt đầu tạo đơn cho:", TenNguoiNhan);
+
+        // --- BƯỚC 1: LẤY CHI TIẾT GIỎ HÀNG ---
+        const sqlGetCart = `
+            SELECT gh.SanPhamId, gh.SoLuong, sp.GiaBan, sp.TenSanPham, sp.HinhAnh 
+            FROM giohang gh 
+            JOIN sanpham sp ON gh.SanPhamId = sp.Id 
+            WHERE gh.NguoiDungId = ?
+        `;
+        const [cartItems] = await db.query(sqlGetCart, [userId]);
+
+        if (cartItems.length === 0) {
+            return res.status(400).json({ message: "Giỏ hàng trống" });
+        }
+
+        // --- TÍNH TOÁN TIỀN ---
+        let tongTienHang = 0;
+        for (const item of cartItems) {
+            tongTienHang += Number(item.GiaBan) * item.SoLuong;
+        }
+        const phiShip = 30000; 
+        const giamGia = 0;     
+        const thanhTien = tongTienHang + phiShip - giamGia;
+
+        // --- BƯỚC 2: TẠO ĐƠN HÀNG ---
+        const orderIdStr = `DH${Date.now()}`; 
+        
+        const sqlInsertOrder = `
+            INSERT INTO donhang (
+                Id, NguoiDungId, TenNguoiNhan, SdtNguoiNhan, DiaChiGiao, 
+                TongTienHang, PhiShip, GiamGia, ThanhTien, 
+                TrangThaiDonHang, TrangThaiThanhToan, NgayDat
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ChoXacNhan', 'Chưa thanh toán', NOW())
+        `;
+        
+        await db.query(sqlInsertOrder, [
+            orderIdStr, userId, TenNguoiNhan, SdtNguoiNhan, DiaChiGiao, 
+            tongTienHang, phiShip, giamGia, thanhTien
+        ]);
+
+        // --- BƯỚC 3: LƯU CHI TIẾT ĐƠN HÀNG ---
+        const sqlInsertDetail = `
+            INSERT INTO chitietdonhang (Id, DonHangId, SanPhamId, TenSanPham, SoLuong, GiaLucMua, ThanhTien) 
+            VALUES ?
+        `;
+        const baseTime = Date.now();
+        const detailValues = cartItems.map((item, i) => [
+            `CT${baseTime}${i}`, orderIdStr, item.SanPhamId, item.TenSanPham,
+            item.SoLuong, item.GiaBan, item.GiaBan * item.SoLuong
+        ]);
+        await db.query(sqlInsertDetail, [detailValues]);
+
+        // --- BƯỚC 4: LƯU GIAO DỊCH ---
+        const paymentCode = Date.now(); 
+        const paymentId = `TT${paymentCode}`; 
+
+        const sqlInsertPayment = `
+            INSERT INTO thanhtoan (Id, DonHangId, PhuongThuc, MaGiaoDich, SoTienThanhToan, TrangThai, NgayThanhToan)
+            VALUES (?, ?, ?, ?, ?, 'Pending', NOW())
+        `;
+        await db.query(sqlInsertPayment, [paymentId, orderIdStr, PhuongThucThanhToan, paymentCode, thanhTien]);
+
+        // --- BƯỚC 5: XÓA GIỎ HÀNG ---
+        await db.query("DELETE FROM giohang WHERE NguoiDungId = ?", [userId]);
+        
+        // Nếu là COD (Thanh toán khi nhận hàng) -> Trả về thành công luôn, không gọi PayOS
+        if (PhuongThucThanhToan === 'cod') {
+            return res.json({ 
+                error: false, 
+                message: "Đặt hàng thành công (COD)", 
+                orderId: orderIdStr 
+            });
+        }
+
+        const descriptionShort = `TT ${orderIdStr}`; 
+        const paymentData = {
+            orderCode: paymentCode,
+            amount: thanhTien,
+            description: descriptionShort,
+            cancelUrl: "https://mobile-tech-ct.onrender.com/api/payment/cancel",
+            returnUrl: "https://mobile-tech-ct.onrender.com/api/payment/success"
+        };
+
+        const result = await payos.createPaymentLink(paymentData);
+        res.json({ error: false, message: "Tạo link thanh toán thành công", checkoutUrl: result.checkoutUrl });
+
+    } catch (error) {
+        console.error("Lỗi chi tiết:", error);
+        res.status(500).json({ error: true, message: "Lỗi Server: " + error.message });
     }
 };

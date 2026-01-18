@@ -62,42 +62,39 @@ export const getProfile = async (req, res) => {
         });
     }
 };
+
 // --- CẬP NHẬT HỒ SƠ ---
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { email, hoTen, soDienThoai, diaChi } = req.body;
+        const { HoTen, SoDienThoai, DiaChi } = req.body;
+        const hoTen = HoTen;
+        const soDienThoai = SoDienThoai;
+        const diaChi = DiaChi;
 
         // 1. Kiểm tra trường trống
-        if (!email || !hoTen) {
-            return res.status(400).json({ success: false, message: "Email và họ tên không được để trống." });
+        if (!hoTen) {
+            return res.status(400).json({ success: false, message: "Họ tên không được để trống." });
         }
 
-        // 2. Kiểm tra định dạng Họ tên (Chỉ chữ)
+        // 2. Validate Họ tên
         const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠƯÀẢÃẠẰẮẲẴẶẦẤẨẪẬÈẺẼẸỀẾỂỄỆÌỈĨỊÒỎÕỌỒỐỔỖỘỜỚỞỠỢÙỦŨỤỪỨỬỮỰỳỷỹỵýÝ\s]+$/;
         if (!nameRegex.test(hoTen)) {
-            return res.status(400).json({ success: false, message: "Họ tên không hợp lệ (không chứa số/ký tự đặc biệt)." });
+            return res.status(400).json({ success: false, message: "Họ tên không hợp lệ." });
         }
 
-        // 3. Kiểm tra định dạng Email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ success: false, message: "Email không đúng định dạng." });
-        }
-
-        // 4. Kiểm tra định dạng Số điện thoại
+        // 3. Validate Số điện thoại
         const phoneRegex = /^[0-9]{10}$/;
         if (soDienThoai && !phoneRegex.test(soDienThoai)) {
             return res.status(400).json({ success: false, message: "Số điện thoại phải gồm 10 chữ số." });
         }
 
-        // 5. Kiểm tra trùng Email (Trừ chính mình)
-        const isEmailTaken = await userModel.checkEmailExcluingUser(email, userId);
-        if (isEmailTaken) {
-            return res.status(400).json({ success: false, message: "Email này đã được tài khoản khác sử dụng." });
-        }
-
-        await userModel.updateProfile(userId, { email, hoTen, soDienThoai, diaChi });
+        // 4. Gọi Model cập nhật
+        await userModel.updateProfile(userId, { 
+            hoTen: hoTen, 
+            soDienThoai: soDienThoai, 
+            diaChi: diaChi 
+        });
 
         res.json({ success: true, message: "Cập nhật thông tin thành công!" });
     } catch (error) {

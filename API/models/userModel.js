@@ -45,9 +45,9 @@ export const userModel = {
     },
 
     // 7. Cập nhật thông tin hồ sơ (Sửa lỗi biến email chưa định nghĩa và sai tên cột HinhAnh)
-    updateProfile: async (userId, { email, hoTen, soDienThoai, diaChi }) => {
-        const sql = "UPDATE nguoidung SET Email = ?, HoTen = ?, SoDienThoai = ?, DiaChi = ? WHERE Id = ?";
-        return await execute(sql, [email, hoTen, soDienThoai, diaChi, userId]);
+    updateProfile: async (userId, { hoTen, soDienThoai, diaChi }) => {
+        const sql = "UPDATE nguoidung SET HoTen = ?, SoDienThoai = ?, DiaChi = ? WHERE Id = ?";
+        return await execute(sql, [hoTen, soDienThoai, diaChi, userId]);
     },
 
     // 8. Cập nhật ảnh đại diện (Lưu ý: Cột trong SQL của cậu là HinhAnh)
@@ -58,7 +58,7 @@ export const userModel = {
 
     // 9. Lấy thông tin chi tiết (Phòng trường hợp Controller gọi getUserById)
     getUserById: async (userId) => {
-        const sql = "SELECT Id, Email, HoTen, SoDienThoai, DiaChi, VaiTro, HinhAnh FROM nguoidung WHERE Id = ?";
+        const sql = "SELECT Id, Email, HoTen, SoDienThoai, DiaChi, VaiTro, AnhDaiDien FROM nguoidung WHERE Id = ?";
         const rows = await execute(sql, [userId]);
         return rows[0];
     },

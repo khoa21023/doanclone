@@ -9,7 +9,7 @@ export const cartModel = {
         return await execute(sql, [userId]);
     },
 
-    // Kiểm tra sản phẩm trong giỏ 
+    // Kiểm tra sản phẩm trong giỏ (Dùng cho addToCart)
     findItemInCart: async (userId, productId) => {
         const sql = "SELECT * FROM giohang WHERE NguoiDungId = ? AND SanPhamId = ?";
         return await execute(sql, [userId, productId]);
@@ -26,7 +26,7 @@ export const cartModel = {
         return await execute(sql, [quantity, userId, productId]);
     },
 
-    // Kiểm tra tồn kho 
+    // Kiểm tra tồn kho (Dùng cho updateQuantity)
     checkStock: async (cartId) => {
         const sql = `SELECT sp.TonKho, sp.TenSanPham 
                      FROM giohang gh JOIN sanpham sp ON gh.SanPhamId = sp.Id 
@@ -44,5 +44,6 @@ export const cartModel = {
     removeOneItem: async (cartId, userId) => {
         const sql = "DELETE FROM giohang WHERE Id = ? AND NguoiDungId = ?";
         return await execute(sql, [cartId, userId]);
-    }
+    },
+    
 };
