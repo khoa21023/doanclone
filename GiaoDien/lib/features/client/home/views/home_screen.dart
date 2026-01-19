@@ -6,6 +6,7 @@ import '../../../../data/models/product_model.dart';
 import '../../product/view_models/product_view_model.dart';
 import '../../../../data/providers/home_cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
+import '../../wishlist/view_models/wishlist_view_model.dart';
 
 import '../../cart/views/cart_screen.dart';
 import '../../product/views/product_detail_screen.dart';
@@ -48,6 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
+      // --- TẢI DỮ LIỆU ĐỂ CẬP NHẬT BADGE NGAY TỪ ĐẦU ---
+      context.read<CartViewModel>().fetchCart();
+      context.read<WishlistViewModel>().fetchWishlist();
     });
   }
 
@@ -58,10 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     context.read<ClientProductViewModel>().fetchProducts(
-      category: _selectedCategory,
-      sortOption: _currentSortOption,
-      keyword: keyword,
-    );
+          category: _selectedCategory,
+          sortOption: _currentSortOption,
+          keyword: keyword,
+        );
   }
 
   void _onCategorySelected(String category) {
@@ -101,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF2563EB),
         elevation: 0,
         automaticallyImplyLeading: false,
-        titleSpacing: 10, // Giảm khoảng cách để tiết kiệm diện tích
+        titleSpacing: 10, 
         title: Row(
           children: [
             // Logo
@@ -152,14 +156,47 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
 
-          // 2. Nút Yêu thích (Wishlist)
-          IconButton(
-            tooltip: "Sản phẩm yêu thích",
-            icon: const Icon(Icons.favorite_border, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const WishlistScreen()),
+          // 2. Nút Yêu thích (Wishlist) [ĐÃ CẬP NHẬT CONSUMER ĐỂ HIỆN BADGE]
+          Consumer<WishlistViewModel>(
+            builder: (context, wishlistVM, child) {
+              return Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  IconButton(
+                    tooltip: "Sản phẩm yêu thích",
+                    icon:
+                        const Icon(Icons.favorite_border, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WishlistScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  // Logic hiển thị Badge số lượng Wishlist
+                  if (wishlistVM.items.isNotEmpty)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${wishlistVM.items.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -246,13 +283,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: Column(
         children: [
-          // === PHẦN TÌM KIẾM (Đưa xuống body để rộng rãi hơn) ===
+          // === PHẦN TÌM KIẾM ===
           Container(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             decoration: const BoxDecoration(
               color: Color(
                 0xFF2563EB,
-              ), // Cùng màu với AppBar tạo cảm giác liền mạch
+              ), 
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
             child: Container(
@@ -265,10 +302,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller: _searchController,
                 onChanged: (val) =>
                     context.read<ClientProductViewModel>().onSearchChanged(
-                      val,
-                      _selectedCategory,
-                      _currentSortOption,
-                    ),
+                          val,
+                          _selectedCategory,
+                          _currentSortOption,
+                        ),
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   hintText: 'Bạn tìm linh kiện gì hôm nay?',
@@ -475,9 +512,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           width: double.infinity,
                                           fit: BoxFit.cover,
                                           errorBuilder: (c, e, s) => const Icon(
-                                            Icons.image,
-                                            color: Colors.grey,
+                                            Icons.image_not_supported,
                                             size: 50,
+                                            color: Colors.grey,
                                           ),
                                         ),
                                       ),
@@ -577,13 +614,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 backgroundColor: Colors.green,
                                               ),
                                             );
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Lỗi thêm vào giỏ hàng",
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
                                           }
                                         },
                                         child: const Text(
-                                          "Thêm vào giỏ",
+                                          "Thêm",
                                           style: TextStyle(
-                                            fontSize: 12,
                                             color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -621,7 +670,7 @@ class _HomeScreenState extends State<HomeScreen> {
           label,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -656,27 +705,31 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Đăng xuất"),
-        content: const Text("Bạn có muốn đăng xuất?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Hủy"),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Đăng xuất"),
+            content: const Text("Bạn có muốn đăng xuất?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Hủy"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                child: const Text(
+                  "Đồng ý",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-                (route) => false,
-              );
-            },
-            child: const Text("Đồng ý", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
   }
 }
