@@ -1,3 +1,4 @@
+// Model dành riêng cho Admin (Logic cũ)
 class OrderItem {
   final String productId;
   final String productName;
@@ -13,8 +14,8 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['SanPhamId']?.toString() ?? '',
-      productName: json['TenSanPham'] ?? 'Sản phẩm',
+      productId: (json['SanPhamId'] ?? json['productId'] ?? '').toString(),
+      productName: json['TenSanPham'] ?? json['productName'] ?? 'Sản phẩm',
       quantity: int.tryParse(json['SoLuong']?.toString() ?? '0') ?? 0,
       price: double.tryParse(json['GiaLucMua']?.toString() ?? '0') ?? 0.0,
     );
@@ -28,7 +29,10 @@ class Order {
   final String userPhone;
   final List<OrderItem> items;
   final double total;
+
+  // Admin cần sửa trạng thái này (không để final)
   String status;
+
   final DateTime createdAt;
   final String paymentMethod;
   final String address;
@@ -48,30 +52,30 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     List<OrderItem> listItems = [];
-    if (json['items'] != null) {
-      listItems = (json['items'] as List)
+    if (json['products'] != null) {
+      listItems = (json['products'] as List)
           .map((item) => OrderItem.fromJson(item))
           .toList();
     }
 
-    DateTime parseDate(dynamic dateString) {
-      if (dateString == null) return DateTime.now();
-      try {
-        return DateTime.parse(dateString.toString());
-      } catch (_) {
-        return DateTime.now();
-      }
-    }
-
     return Order(
-      id: json['Id']?.toString() ?? 'Unknown',
-      userName: json['HoTen'] ?? 'Khách lẻ',
-      userEmail: json['Email'] ?? 'Không có email',
+      id: (json['Id'] ?? json['id'] ?? 'Unknown').toString(),
+      userName: json['HoTen'] ?? 'Khách',
+      userEmail: json['Email'] ?? '',
       userPhone: json['SoDienThoai'] ?? '',
-      total: double.tryParse(json['TongTienHang']?.toString() ?? '0') ?? 0.0,
-      status: _mapStatusToEnglish(json['TrangThaiDonHang']),
-      createdAt: parseDate(json['NgayDat']),
-      paymentMethod: json['TrangThaiThanhToan'] ?? '0',
+      total:
+          double.tryParse(
+            json['ThanhTien']?.toString() ?? json['total']?.toString() ?? '0',
+          ) ??
+          0.0,
+
+      // Logic map sang tiếng Anh cho Admin
+      status: _mapStatusToEnglish(json['TrangThaiDonHang'] ?? json['status']),
+
+      createdAt: json['NgayDat'] != null
+          ? DateTime.parse(json['NgayDat'])
+          : DateTime.now(),
+      paymentMethod: json['TrangThaiThanhToan'] ?? 'COD',
       address: json['DiaChiGiao'] ?? '',
       items: listItems,
     );
@@ -79,25 +83,27 @@ class Order {
 
   static String _mapStatusToEnglish(String? vnStatus) {
     final s = vnStatus?.toLowerCase() ?? '';
-    if (s == 'đã đặt') return 'placed';
-    if (s == 'đang giao') return 'processing';
-    if (s == 'đã giao') return 'completed';
-    if (s == 'đã hủy') return 'cancelled';
+    if (s == 'đã đặt' || s == 'chờ xác nhận' || s == 'choxacnhan')
+      return 'placed';
+    if (s == 'đang giao' || s == 'danggiao') return 'processing';
+    if (s == 'đã giao' || s == 'dagiao') return 'completed';
+    if (s == 'đã hủy' || s == 'dahuy' || s == 'đã huỷ') return 'cancelled';
     return 'placed';
   }
 
+  // Getter cho Admin UI
   String get statusInVietnamese {
     switch (status) {
       case 'placed':
-        return 'Đã Đặt';
+        return 'Chờ xác nhận';
       case 'processing':
-        return 'Đang Giao';
+        return 'Đang giao';
       case 'completed':
-        return 'Đã Giao';
+        return 'Đã giao';
       case 'cancelled':
-        return 'Đã Hủy';
+        return 'Đã hủy';
       default:
-        return 'Mới';
+        return 'Chờ xác nhận';
     }
   }
 }
