@@ -6,13 +6,72 @@ import 'features/auth/view_models/login_view_model.dart';
 import 'features/auth/view_models/signup_view_model.dart';
 import 'features/auth/views/login_screen.dart';
 import 'features/admin/promotions/view_models/promotions_view_model.dart';
+import 'features/client/product/view_models/product_view_model.dart';
+import 'features/client/cart/view_models/cart_view_model.dart';
+import 'package:app_links/app_links.dart';
+import 'features/client/checkout/views/success_screen.dart';
+import 'features/client/order/view_models/order_view_model.dart';
+import 'features/client/wishlist/view_models/wishlist_view_model.dart';
+import 'dart:async';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinkListener();
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  // --- HÀM LẮNG NGHE DEEP LINK ---
+  void _initDeepLinkListener() {
+    _appLinks = AppLinks();
+
+    // Lắng nghe khi App đang chạy nền hoặc được mở lại từ link
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        print("Nhận được Deep Link: $uri");
+        _handleDeepLink(uri);
+      }
+    });
+  }
+
+  // Xử lý Logic chuyển trang
+  void _handleDeepLink(Uri uri) {
+    // Backend trả về: mobiletech://payment/success
+    if (uri.scheme == 'mobiletech' && uri.host == 'payment') {
+      if (uri.path.contains('success')) {
+        // Điều hướng đến màn hình thành công
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const SuccessScreen()),
+          (route) => false, // Xóa hết lịch sử cũ (Giỏ hàng, Checkout...)
+        );
+      } else if (uri.path.contains('cancel')) {
+        // Điều hướng về trang Giỏ hàng hoặc thông báo lỗi
+        print("Người dùng đã hủy thanh toán");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +85,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
 
-        // --- THÊM DÒNG NÀY ĐỂ SỬA LỖI MÀN HÌNH ĐỎ ---
         ChangeNotifierProvider(create: (_) => PromotionsViewModel()),
 
-        // GỢI Ý: Nếu bạn có ProductViewModel hay OrderViewModel dùng cho Dashboard
-        // thì cũng nên thêm luôn vào đây để tránh lỗi tương tự ở các tab khác:
-        // ChangeNotifierProvider(create: (_) => ProductViewModel()),
-        // ChangeNotifierProvider(create: (_) => OrderViewModel()),
+        ChangeNotifierProvider(create: (_) => ClientProductViewModel()),
+        ChangeNotifierProvider(create: (_) => CartViewModel()),
+        ChangeNotifierProvider(create: (_) => OrderViewModel()),
+        ChangeNotifierProvider(create: (_) => WishlistViewModel()),
       ],
       child: MaterialApp(
         title: 'Mobile Tech CT',
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
