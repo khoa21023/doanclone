@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../../client/order/view_models/order_view_model.dart';
-import '../../../../data/models/order.dart';
+import '../../../../data/models/client_order.dart';
 import 'order_detail_screen.dart'; // Đảm bảo đã import trang chi tiết
 
 class OrderHistoryScreen extends StatefulWidget {
