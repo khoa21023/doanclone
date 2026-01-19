@@ -8,13 +8,13 @@ class CartProvider with ChangeNotifier {
   double get totalAmount {
     var total = 0.0;
     for (var item in _items) {
-      total += item.product.price * item.quantity;
+      total += item.product.sellPrice * item.quantity;
     }
     return total;
   }
 
   void addItem(Product product, {int quantity = 1}) {
-    // Kiểm tra xem sản phẩm đã có trong giỏ 
+    // Kiểm tra xem sản phẩm đã có trong giỏ
     final index = _items.indexWhere((item) => item.product.id == product.id);
 
     if (index >= 0) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../order/views/order_detail_screen.dart';
+import '../../checkout/view_models/checkout_view_model.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -48,10 +50,13 @@ class SuccessScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
+                  final checkoutVM = context.read<CheckoutViewModel>();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const OrderDetailScreen(),
+                      builder: (context) => OrderDetailScreen(
+                        orderId: checkoutVM.lastOrderId ?? "DH_UNKNOWN",
+                      ),
                     ),
                   );
                 },

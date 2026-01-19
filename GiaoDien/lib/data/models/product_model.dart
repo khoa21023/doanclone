@@ -1,7 +1,8 @@
 class Product {
   final String id;
   final String name;
-  final double price;
+  final double sellPrice;
+  final double originalPrice;
   final String imageUrl;
   final String color;
   final String storage;
@@ -13,7 +14,8 @@ class Product {
   Product({
     required this.id,
     required this.name,
-    required this.price,
+    required this.sellPrice,
+    required this.originalPrice,
     required this.imageUrl,
     this.color = '',
     this.storage = '',
@@ -27,8 +29,8 @@ class Product {
     return Product(
       id: json['Id'].toString(),
       name: json['TenSanPham'] ?? 'Sản phẩm',
-      price: double.tryParse(json['Gia'].toString()) ?? 0.0,
-
+      sellPrice: double.tryParse(json['GiaBan'].toString()) ?? 0.0,
+      originalPrice: double.tryParse(json['GiaGoc'].toString()) ?? 0.0,
       imageUrl: json['HinhAnh'] != null
           ? 'https://mobile-tech-ct.onrender.com/uploads/${json['HinhAnh']}'
           : 'https://via.placeholder.com/150',
