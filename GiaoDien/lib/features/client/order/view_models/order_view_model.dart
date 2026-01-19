@@ -1,21 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_tech_ct/data/models/order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../data/models/order.dart';
+import '../../../../data/models/client_order.dart';
 
 class OrderViewModel extends ChangeNotifier {
-  List<Order> _orders = [];
+  List<ClientOrder> _orders = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  List<Order> get orders => _orders;
+  List<ClientOrder> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Order? _currentOrderDetail;
-  Order? get currentOrderDetail => _currentOrderDetail;
+  ClientOrder? _currentOrderDetail;
+  ClientOrder? get currentOrderDetail => _currentOrderDetail;
 
   Future<void> fetchOrderDetails(String orderId) async {
     _isLoading = true;
@@ -41,7 +40,7 @@ class OrderViewModel extends ChangeNotifier {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['success'] == true) {
-        _currentOrderDetail = Order.fromJson(data['data']);
+        _currentOrderDetail = ClientOrder.fromJson(data['data']);
       } else {
         _errorMessage = data['message'] ?? "Không thể lấy chi tiết đơn hàng";
       }
@@ -78,8 +77,8 @@ class OrderViewModel extends ChangeNotifier {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           final List<dynamic> listData = data['data'];
-          // Map sang Order
-          _orders = listData.map((e) => Order.fromJson(e)).toList();
+          // Map sang ClientOrder
+          _orders = listData.map((e) => ClientOrder.fromJson(e)).toList();
         } else {
           _orders = [];
         }
