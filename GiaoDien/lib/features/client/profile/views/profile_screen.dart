@@ -12,8 +12,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _profileFormKey = GlobalKey<FormState>();
-  final _passwordFormKey = GlobalKey<FormState>();
 
+  // Controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -27,11 +27,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
 
-  void _fillProfile(UserProfile p) {
-    _nameController.text = p.name;
-    _emailController.text = p.email;
-    _phoneController.text = p.phone;
-    _addressController.text = p.address;
+  @override
+  void initState() {
+    super.initState();
+    // Gọi API lấy thông tin ngay khi vào màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileViewModel>().fetchProfile();
+    });
+  }
+
+  // Hàm điền dữ liệu vào ô input (Chỉ gọi khi không đang sửa để tránh reset lúc gõ)
+  void _populateControllers(UserProfile? p) {
+    if (p != null) {
+      // Chỉ cập nhật text nếu controller đang trống hoặc khác dữ liệu gốc
+      // Điều này giúp trải nghiệm mượt mà hơn
+      if (_nameController.text.isEmpty) _nameController.text = p.name;
+      if (_emailController.text.isEmpty) _emailController.text = p.email;
+      if (_phoneController.text.isEmpty) _phoneController.text = p.phone;
+      if (_addressController.text.isEmpty) _addressController.text = p.address;
+    }
   }
 
   @override
@@ -48,9 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Khởi tạo ViewModel ngay tại đây khi vào trang
+    // Không tạo Provider ở đây nữa, nên tạo ở main.dart hoặc route cha
+    // Nhưng nếu bạn muốn tạo cục bộ thì giữ nguyên cũng được.
     return ChangeNotifierProvider(
-      create: (_) => ProfileViewModel(),
+      create: (_) =>
+          ProfileViewModel()..fetchProfile(), // Gọi fetch ngay khi tạo
       child: Scaffold(
         backgroundColor: const Color(0xFFF0F9FF),
         appBar: AppBar(
@@ -62,39 +78,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         body: Consumer<ProfileViewModel>(
           builder: (context, vm, child) {
-            // Đổ dữ liệu mẫu từ VM vào controller
-            _fillProfile(vm.profile);
+            if (vm.isLoading && vm.profile == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // Logic điền dữ liệu: Chỉ điền khi KHÔNG ở chế độ sửa
+            if (!vm.isEditingProfile) {
+              _populateControllers(vm.profile);
+            }
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // --- PHẦN AVATAR (GIỮ TỪ FILE CŨ) ---
+                  // --- AVATAR ---
                   Center(
                     child: Stack(
                       children: [
-                        const CircleAvatar(
-                          radius: 55,
+                        CircleAvatar(
+                          radius: 50,
                           backgroundColor: Colors.white,
                           backgroundImage: NetworkImage(
-                            "https://ui-avatars.com/api/?name=User&background=random",
+                            "https://ui-avatars.com/api/?name=${vm.profile?.name ?? 'User'}&background=random&size=128",
                           ),
                         ),
-                        if (vm.isEditingProfile)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: CircleAvatar(
-                              radius: 18,
-                              backgroundColor: const Color(0xFF2563EB),
-                              child: IconButton(
-                                icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
-                                onPressed: () {
-                                  // Chỗ này để chọn ảnh
-                                },
-                              ),
-                            ),
+                        // Nút sửa ảnh (Tạm ẩn vì chưa có API upload ảnh)
+                        /*
+                        Positioned(
+                          bottom: 0, right: 0,
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: const Color(0xFF2563EB),
+                            child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                           ),
+                        ),
+                        */
                       ],
                     ),
                   ),
@@ -104,18 +122,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildCard(
                     title: "Thông tin cá nhân",
                     actionText: vm.isEditingProfile ? null : "Chỉnh sửa",
-                    onAction: vm.isEditingProfile ? null : vm.startEditProfile,
+                    onAction: vm.isEditingProfile
+                        ? null
+                        : () {
+                            // Khi bấm chỉnh sửa, đảm bảo text controller khớp với data hiện tại
+                            if (vm.profile != null) {
+                              _nameController.text = vm.profile!.name;
+                              _phoneController.text = vm.profile!.phone;
+                              _addressController.text = vm.profile!.address;
+                            }
+                            vm.startEditProfile();
+                          },
                     child: Form(
                       key: _profileFormKey,
                       child: Column(
                         children: [
-                          _buildProfileField(icon: Icons.person, label: "Họ và tên", controller: _nameController, enabled: vm.isEditingProfile),
-                          _buildProfileField(icon: Icons.email, label: "Email", controller: _emailController, enabled: vm.isEditingProfile),
-                          _buildProfileField(icon: Icons.phone, label: "Số điện thoại", controller: _phoneController, enabled: vm.isEditingProfile),
-                          _buildProfileField(icon: Icons.location_on, label: "Địa chỉ", controller: _addressController, enabled: vm.isEditingProfile),
-                          
+                          _buildProfileField(
+                            icon: Icons.person,
+                            label: "Họ và tên",
+                            controller: _nameController,
+                            enabled: vm.isEditingProfile,
+                          ),
+                          _buildProfileField(
+                            icon: Icons.email,
+                            label: "Email",
+                            controller: _emailController,
+                            enabled: false,
+                          ), // Email thường không cho sửa
+                          _buildProfileField(
+                            icon: Icons.phone,
+                            label: "Số điện thoại",
+                            controller: _phoneController,
+                            enabled: vm.isEditingProfile,
+                          ),
+                          _buildProfileField(
+                            icon: Icons.location_on,
+                            label: "Địa chỉ",
+                            controller: _addressController,
+                            enabled: vm.isEditingProfile,
+                          ),
+
                           if (vm.isEditingProfile) ...[
                             const SizedBox(height: 12),
+                            if (vm.errorMessage != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  vm.errorMessage!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
                             Row(
                               children: [
                                 Expanded(
@@ -131,42 +187,169 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       backgroundColor: const Color(0xFF2563EB),
                                       foregroundColor: Colors.white,
                                     ),
-                                    onPressed: () => vm.cancelEditProfile(),
-                                    child: const Text("Lưu thay đổi"),
+                                    onPressed: vm.isLoading
+                                        ? null
+                                        : () async {
+                                            bool success = await vm
+                                                .updateProfile(
+                                                  _nameController.text,
+                                                  _phoneController.text,
+                                                  _addressController.text,
+                                                );
+                                            if (success && context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    "Cập nhật thành công!",
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                    child: vm.isLoading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text("Lưu thay đổi"),
                                   ),
                                 ),
                               ],
-                            )
-                          ]
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // --- BẢO MẬT ---
+                  // --- ĐỔI MẬT KHẨU ---
                   _buildCard(
                     title: "Bảo mật",
                     actionText: vm.isChangingPassword ? null : "Đổi mật khẩu",
-                    onAction: vm.isChangingPassword ? null : vm.startChangePassword,
+                    onAction: vm.isChangingPassword
+                        ? null
+                        : () {
+                            _currentPassController.clear();
+                            _newPassController.clear();
+                            vm.startChangePassword();
+                          },
                     child: vm.isChangingPassword
                         ? Column(
                             children: [
-                              _buildPasswordField(label: "Mật khẩu hiện tại", controller: _currentPassController, visible: _showCurrentPassword, onToggleVisibility: () => setState(() => _showCurrentPassword = !_showCurrentPassword)),
-                              _buildPasswordField(label: "Mật khẩu mới", controller: _newPassController, visible: _showNewPassword, onToggleVisibility: () => setState(() => _showNewPassword = !_showNewPassword)),
+                              _buildPasswordField(
+                                label: "Mật khẩu hiện tại",
+                                controller: _currentPassController,
+                                visible: _showCurrentPassword,
+                                onToggleVisibility: () => setState(
+                                  () => _showCurrentPassword =
+                                      !_showCurrentPassword,
+                                ),
+                              ),
+                              _buildPasswordField(
+                                label: "Mật khẩu mới",
+                                controller: _newPassController,
+                                visible: _showNewPassword,
+                                onToggleVisibility: () => setState(
+                                  () => _showNewPassword = !_showNewPassword,
+                                ),
+                              ),
+
+                              if (vm.errorMessage != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Text(
+                                    vm.errorMessage!,
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                ),
+
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  Expanded(child: OutlinedButton(onPressed: vm.cancelChangePassword, child: const Text("Huỷ"))),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: vm.cancelChangePassword,
+                                      child: const Text("Huỷ"),
+                                    ),
+                                  ),
                                   const SizedBox(width: 12),
-                                  Expanded(child: ElevatedButton(onPressed: vm.cancelChangePassword, child: const Text("Cập nhật"))),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFF2563EB,
+                                        ),
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: vm.isLoading
+                                          ? null
+                                          : () async {
+                                              if (_currentPassController
+                                                      .text
+                                                      .isEmpty ||
+                                                  _newPassController
+                                                      .text
+                                                      .isEmpty) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Vui lòng nhập đầy đủ thông tin",
+                                                    ),
+                                                  ),
+                                                );
+                                                return;
+                                              }
+                                              bool success = await vm
+                                                  .changePassword(
+                                                    _currentPassController.text,
+                                                    _newPassController.text,
+                                                  );
+                                              if (success && context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      "Đổi mật khẩu thành công!",
+                                                    ),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                      child: vm.isLoading
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Text("Cập nhật"),
+                                    ),
+                                  ),
                                 ],
-                              )
+                              ),
                             ],
                           )
                         : const Align(
                             alignment: Alignment.centerLeft,
-                            child: Text("Bảo vệ tài khoản bằng mật khẩu mạnh", style: TextStyle(color: Colors.grey)),
+                            child: Text(
+                              "Bảo vệ tài khoản bằng mật khẩu mạnh",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ),
                   ),
                 ],
@@ -178,61 +361,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- WIDGET HELPERS ---
-  Widget _buildCard({required String title, String? actionText, VoidCallback? onAction, required Widget child}) {
+  // --- CÁC WIDGET PHỤ GIỮ NGUYÊN ---
+  Widget _buildCard({
+    required String title,
+    String? actionText,
+    VoidCallback? onAction,
+    required Widget child,
+  }) {
     return Card(
       color: Colors.white,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          Row(children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const Spacer(),
-            if (actionText != null) TextButton(onPressed: onAction, child: Text(actionText)),
-          ]),
-          const Divider(),
-          child,
-        ]),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                if (actionText != null)
+                  TextButton(onPressed: onAction, child: Text(actionText)),
+              ],
+            ),
+            const Divider(),
+            child,
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildProfileField({required IconData icon, required String label, required TextEditingController controller, required bool enabled}) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
-      ]),
-      const SizedBox(height: 6),
-      TextFormField(
-        controller: controller,
-        enabled: enabled,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: enabled ? Colors.white : const Color(0xFFF8FAFC),
-          border: const OutlineInputBorder(),
+  Widget _buildProfileField({
+    required IconData icon,
+    required String label,
+    required TextEditingController controller,
+    required bool enabled,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: Colors.grey),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-      ),
-      const SizedBox(height: 14),
-    ]);
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          enabled: enabled,
+          style: TextStyle(
+            color: enabled ? Colors.black : Colors.black87,
+          ), // Chữ vẫn đậm khi disable
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: enabled ? Colors.white : const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
   }
 
-  Widget _buildPasswordField({required String label, required TextEditingController controller, required bool visible, required VoidCallback onToggleVisibility}) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
-      const SizedBox(height: 6),
-      TextFormField(
-        controller: controller,
-        obscureText: !visible,
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          suffixIcon: IconButton(icon: Icon(visible ? Icons.visibility : Icons.visibility_off), onPressed: onToggleVisibility),
+  Widget _buildPasswordField({
+    required String label,
+    required TextEditingController controller,
+    required bool visible,
+    required VoidCallback onToggleVisibility,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      const SizedBox(height: 14),
-    ]);
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          obscureText: !visible,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(visible ? Icons.visibility : Icons.visibility_off),
+              onPressed: onToggleVisibility,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
   }
 }
