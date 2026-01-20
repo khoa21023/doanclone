@@ -3,22 +3,108 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../data/models/cart_model.dart';
+import '../../../../data/models/promotion.dart';
 
 class CartViewModel extends ChangeNotifier {
   List<CartItem> _items = [];
   CartSummary _summary = CartSummary(subTotal: 0, shippingFee: 0, total: 0);
   bool _isLoading = false;
   String? _errorMessage;
+  List<Promotion> _promotions = []; // Danh sách mã lấy từ server
+  Promotion? _selectedPromotion;
 
   List<CartItem> get items => _items;
   CartSummary get summary => _summary;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  List<Promotion> get promotions => _promotions;
+  Promotion? get selectedPromotion => _selectedPromotion;
 
   // Lấy số lượng item để hiện Badge trên icon giỏ hàng
   int get itemCount => _items.length;
 
-  // 1. LẤY GIỎ HÀNG
+  // --- TÍNH TIỀN ---
+  // 1. Lấy số tiền được giảm
+  double get discountAmount {
+    if (_selectedPromotion == null) return 0;
+    // Kiểm tra lại điều kiện đơn tối thiểu
+    if (_summary.subTotal < _selectedPromotion!.minOrderValue) {
+      return 0;
+    }
+    return _selectedPromotion!.discountAmount;
+  }
+
+  // 2. Tính tổng cuối cùng
+  double get totalAfterDiscount {
+    double finalTotal = _summary.total - discountAmount;
+    return finalTotal > 0 ? finalTotal : 0; // Không để âm tiền
+  }
+
+  // --- LẤY DANH SÁCH KHUYẾN MÃI ---
+  Future<void> fetchPromotions() async {
+    try {
+      // 1. Lấy Token từ bộ nhớ máy
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      final url = Uri.parse(
+        'https://mobile-tech-ct.onrender.com/api/promotions',
+      );
+
+      final response = await http.get(
+        url,
+        // 2. Thêm Header chứa Token để Backend cho phép đi qua
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> list = data['data'];
+          _promotions = list.map((e) => Promotion.fromJson(e)).toList();
+
+          // Lọc chỉ lấy mã còn hạn
+          // _promotions = _promotions.where((p) => p.isValid).toList();
+          notifyListeners();
+        }
+      } else {
+        print("Lỗi tải khuyến mãi: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      print("Lỗi kết nối khuyến mãi: $e");
+    }
+  }
+
+  // --- CHỌN MÃ ---
+  bool applyPromotion(Promotion promo) {
+    print("Đang thử mã: ${promo.code}");
+    print(
+      "Giá trị đơn: ${_summary.subTotal} - Đơn tối thiểu: ${promo.minOrderValue}",
+    );
+    print("Số tiền giảm: ${promo.discountAmount}");
+
+    // Kiểm tra điều kiện đơn tối thiểu
+    if (_summary.subTotal < promo.minOrderValue) {
+      _errorMessage = "Đơn hàng chưa đủ ${promo.minOrderValue}đ để dùng mã này";
+      notifyListeners();
+      return false; // Áp dụng thất bại
+    }
+
+    // Nếu đang chọn chính mã đó thì bỏ chọn
+    if (_selectedPromotion?.id == promo.id) {
+      _selectedPromotion = null;
+    } else {
+      _selectedPromotion = promo;
+    }
+    _errorMessage = null; // Xóa lỗi nếu có
+    notifyListeners();
+    return true; // Thành công
+  }
+
+  // --- LẤY GIỎ HÀNG ---
   Future<void> fetchCart() async {
     _isLoading = true;
     _errorMessage = null;
@@ -46,6 +132,12 @@ class CartViewModel extends ChangeNotifier {
 
           // Parse thông tin tổng tiền
           _summary = CartSummary.fromJson(data['data']['summary']);
+
+          // RESET mã giảm giá nếu tổng đơn thay đổi và không còn đủ điều kiện
+          if (_selectedPromotion != null &&
+              _summary.subTotal < _selectedPromotion!.minOrderValue) {
+            _selectedPromotion = null;
+          }
         }
       } else {
         _errorMessage = "Không tải được giỏ hàng";

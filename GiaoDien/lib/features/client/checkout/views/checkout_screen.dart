@@ -43,28 +43,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _isDataPopulated = true;
   }
 
-  // Gán dữ liệu từ VM vào UI
-  Future<void> _bindDataFromViewModel() async {
-    final viewModel = context.read<CheckoutViewModel>();
-
-    // 1. Yêu cầu VM tải dữ liệu
-    await viewModel.fetchAndPrepareData();
-
-    // 2. Lấy dữ liệu từ State của VM để hiển thị
-    if (viewModel.userProfile != null) {
-      final user = viewModel.userProfile!;
-
-      setState(() {
-        _nameController.text = user.name;
-        _phoneController.text = user.phone;
-        _addressController.text = user.address;
-
-        // GỌI HÀM LOGIC TỪ VM
-        _cityController.text = viewModel.detectCityFromAddress(user.address);
-      });
-    }
-  }
-
   void _goToPayment() {
     // Validate cơ bản trước khi qua bước 2
     if (_nameController.text.isEmpty ||
@@ -96,6 +74,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       note: _noteController.text,
       paymentMethod: _selectedPaymentMethod,
       cartViewModel: cart,
+      promotionCode: cart.selectedPromotion?.code,
     );
 
     if (!context.mounted) return;
@@ -393,7 +372,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          "Đặt hàng • ${currencyFormat.format(cart.summary.total)}", // Hiển thị giá thật
+                          "Đặt hàng • ${currencyFormat.format(cart.totalAfterDiscount)}", // Hiển thị giá thật
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -445,6 +424,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   "Phí giao hàng",
                   currencyFormat.format(cart.summary.shippingFee),
                 ),
+                if (cart.discountAmount > 0) ...[
+                  const SizedBox(height: 8),
+                  _buildSummaryRow(
+                    "Giảm giá",
+                    "-${currencyFormat.format(cart.discountAmount)}",
+                    isDiscount: true,
+                  ),
+                ],
+
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -457,7 +445,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     Text(
-                      currencyFormat.format(cart.summary.total),
+                      currencyFormat.format(cart.totalAfterDiscount),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -574,7 +562,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isBold = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    bool isDiscount = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -582,7 +575,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: isDiscount
+                  ? Colors.green
+                  : Colors.grey[600], // Nếu là giảm giá thì màu xanh
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
@@ -591,6 +586,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Text(
           value,
           style: TextStyle(
+            color: isDiscount
+                ? Colors.green
+                : Colors.black, // Số tiền cũng màu xanh
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
           ),

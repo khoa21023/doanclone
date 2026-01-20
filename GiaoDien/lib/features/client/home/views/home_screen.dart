@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../data/models/product_model.dart';
 import '../../product/view_models/product_view_model.dart';
-import '../../../../data/providers/home_cart_provider.dart';
 import '../../../../data/providers/wishlist_provider.dart';
 import '../../wishlist/view_models/wishlist_view_model.dart';
 
@@ -62,10 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     context.read<ClientProductViewModel>().fetchProducts(
-          category: _selectedCategory,
-          sortOption: _currentSortOption,
-          keyword: keyword,
-        );
+      category: _selectedCategory,
+      sortOption: _currentSortOption,
+      keyword: keyword,
+    );
   }
 
   void _onCategorySelected(String category) {
@@ -105,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF2563EB),
         elevation: 0,
         automaticallyImplyLeading: false,
-        titleSpacing: 10, 
+        titleSpacing: 10,
         title: Row(
           children: [
             // Logo
@@ -164,8 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   IconButton(
                     tooltip: "Sản phẩm yêu thích",
-                    icon:
-                        const Icon(Icons.favorite_border, color: Colors.white),
+                    icon: const Icon(
+                      Icons.favorite_border,
+                      color: Colors.white,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -287,9 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             decoration: const BoxDecoration(
-              color: Color(
-                0xFF2563EB,
-              ), 
+              color: Color(0xFF2563EB),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
             child: Container(
@@ -300,12 +298,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: TextField(
                 controller: _searchController,
-                onChanged: (val) =>
-                    context.read<ClientProductViewModel>().onSearchChanged(
-                          val,
-                          _selectedCategory,
-                          _currentSortOption,
-                        ),
+                onChanged: (val) {
+                  setState(() {});
+                  context.read<ClientProductViewModel>().onSearchChanged(
+                    val,
+                    _selectedCategory,
+                    _currentSortOption,
+                  );
+                },
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   hintText: 'Bạn tìm linh kiện gì hôm nay?',
@@ -318,22 +318,66 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.tune,
-                      color: _isFilterVisible
-                          ? const Color(0xFF2563EB)
-                          : Colors.grey,
-                    ),
-                    onPressed: () =>
-                        setState(() => _isFilterVisible = !_isFilterVisible),
+
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_searchController.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.cancel,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {});
+
+                            context
+                                .read<ClientProductViewModel>()
+                                .onSearchChanged(
+                                  "",
+                                  _selectedCategory,
+                                  _currentSortOption,
+                                );
+                          },
+                        ),
+                      Container(
+                        margin: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: _isFilterVisible
+                              ? const Color(0xFF2563EB)
+                              : const Color.fromARGB(173, 128, 130, 128),
+                          borderRadius: BorderRadius.horizontal(
+                            right: Radius.circular(8),
+                          ),
+                        ),
+                        child: IconButton(
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.tune,
+                            color: _isFilterVisible
+                                ? Colors.white
+                                : Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: () => setState(
+                            () => _isFilterVisible = !_isFilterVisible,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
 
-          // 1. THANH LỌC SẮP XẾP (Hiện ra khi bấm icon Tune)
+          // 1. THANH LỌC SẮP XẾP
           if (_isFilterVisible)
             Container(
               color: Colors.white,
@@ -705,31 +749,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text("Đăng xuất"),
-            content: const Text("Bạn có muốn đăng xuất?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Hủy"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                child: const Text(
-                  "Đồng ý",
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text("Đăng xuất"),
+        content: const Text("Bạn có muốn đăng xuất?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Hủy"),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text("Đồng ý", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 }

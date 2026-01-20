@@ -77,6 +77,7 @@ class CheckoutViewModel extends ChangeNotifier {
     required String note,
     required String paymentMethod,
     required CartViewModel cartViewModel,
+    String? promotionCode,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -101,6 +102,7 @@ class CheckoutViewModel extends ChangeNotifier {
           'DiaChiGiao': address,
           'GhiChu': note,
           'PhuongThucThanhToan': paymentMethod,
+          'MaKhuyenMai': promotionCode,
         }),
       );
 
