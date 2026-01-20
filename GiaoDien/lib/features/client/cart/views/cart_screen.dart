@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../view_models/cart_view_model.dart';
 import '../../checkout/views/checkout_screen.dart';
-import '../../../../data/models/promotion.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
