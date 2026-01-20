@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../view_models/promotions_view_model.dart';
-// import model của bạn, sửa lại đường dẫn nếu cần
-import '../../../../data/models/promotion.dart';
 
 class PromotionsScreen extends StatefulWidget {
   const PromotionsScreen({super.key});

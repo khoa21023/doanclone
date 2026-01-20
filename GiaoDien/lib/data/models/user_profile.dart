@@ -4,6 +4,7 @@ class UserProfile {
   final String email;
   final String phone;
   final String address;
+  final String? avatarUrl;
 
   UserProfile({
     required this.id,
@@ -11,6 +12,7 @@ class UserProfile {
     required this.email,
     required this.phone,
     required this.address,
+    this.avatarUrl,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class UserProfile {
       email: json['Email'] ?? json['email'] ?? '',
       phone: json['SoDienThoai'] ?? json['phone'] ?? '',
       address: json['DiaChi'] ?? json['address'] ?? '',
+      avatarUrl: json['AnhDaiDien'] ?? json['avatarUrl'],
     );
   }
 

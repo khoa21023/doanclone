@@ -16,24 +16,53 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int _currentStep = 0;
   String _selectedPaymentMethod = 'cod';
 
-  // Thêm NameController
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _zipController =
-      TextEditingController(); // Có thể dùng làm Ghi chú nếu muốn
-  final _phoneController = TextEditingController();
-  final _promoController = TextEditingController();
+  final _noteController = TextEditingController();
+
+  bool _isDataPopulated = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _zipController.dispose();
     _phoneController.dispose();
-    _promoController.dispose();
     super.dispose();
+  }
+
+  void _fillDataToUI(dynamic userProfile, CheckoutViewModel viewModel) {
+    if (userProfile == null) return;
+
+    _nameController.text = userProfile.name;
+    _phoneController.text = userProfile.phone;
+    _addressController.text = userProfile.address;
+    _cityController.text = viewModel.detectCityFromAddress(userProfile.address);
+    _isDataPopulated = true;
+  }
+
+  // Gán dữ liệu từ VM vào UI
+  Future<void> _bindDataFromViewModel() async {
+    final viewModel = context.read<CheckoutViewModel>();
+
+    // 1. Yêu cầu VM tải dữ liệu
+    await viewModel.fetchAndPrepareData();
+
+    // 2. Lấy dữ liệu từ State của VM để hiển thị
+    if (viewModel.userProfile != null) {
+      final user = viewModel.userProfile!;
+
+      setState(() {
+        _nameController.text = user.name;
+        _phoneController.text = user.phone;
+        _addressController.text = user.address;
+
+        // GỌI HÀM LOGIC TỪ VM
+        _cityController.text = viewModel.detectCityFromAddress(user.address);
+      });
+    }
   }
 
   void _goToPayment() {
@@ -64,7 +93,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       name: _nameController.text,
       phone: _phoneController.text,
       address: fullAddress,
-      note: _zipController.text,
+      note: _noteController.text,
       paymentMethod: _selectedPaymentMethod,
       cartViewModel: cart,
     );
@@ -125,11 +154,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cart = Provider.of<CartViewModel>(context);
 
     return ChangeNotifierProvider(
-      create: (_) => CheckoutViewModel(),
+      create: (_) => CheckoutViewModel()..fetchAndPrepareData(),
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
           backgroundColor: const Color(0xFF2563EB),
+          foregroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: _goBack,
@@ -143,7 +173,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         body: Consumer<CheckoutViewModel>(
           builder: (context, checkoutVM, child) {
-            // Hiển thị loading khi đang gọi API
+            // --- LOGIC TỰ ĐỘNG ĐIỀN ---
+            if (checkoutVM.userProfile != null && !_isDataPopulated) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _fillDataToUI(checkoutVM.userProfile, checkoutVM);
+              });
+            }
+
             if (checkoutVM.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -248,18 +284,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel("Ghi chú (Tùy chọn)"),
-                      _buildTextField(
-                        hint: "Giao giờ hành chính...",
-                        controller: _zipController,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 30),
@@ -333,8 +357,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: Text("Thanh toán khi nhận hàng (COD)"),
                         ),
                         DropdownMenuItem(
-                          value: 'visa',
-                          child: Text("Thẻ tín dụng quốc tế (Visa/Master)"),
+                          value: 'qr',
+                          child: Text("Quét mã thanh toán (QR Pay)"),
                         ),
                       ],
                       onChanged: (val) =>
@@ -452,10 +476,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Widget _buildDynamicPaymentContent() {
     switch (_selectedPaymentMethod) {
-      case 'visa':
-        return const Text(
-          "Chức năng thanh toán thẻ đang bảo trì. Vui lòng chọn COD.",
-          style: TextStyle(color: Colors.red),
+      case 'qr':
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50, // Màu nền xanh nhạt giống COD
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.qr_code_2, color: Colors.blue), // Icon mã QR
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Bạn sẽ được chuyển đến cổng thanh toán để quét mã QR.",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       case 'cod':
         return Container(

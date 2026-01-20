@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
-  bool _showConfirmPassword = false;
+  // bool _showConfirmPassword = false;
 
   @override
   void initState() {
@@ -36,11 +36,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  // Hàm điền dữ liệu vào ô input (Chỉ gọi khi không đang sửa để tránh reset lúc gõ)
+  // Hàm điền dữ liệu vào ô input
   void _populateControllers(UserProfile? p) {
     if (p != null) {
       // Chỉ cập nhật text nếu controller đang trống hoặc khác dữ liệu gốc
-      // Điều này giúp trải nghiệm mượt mà hơn
       if (_nameController.text.isEmpty) _nameController.text = p.name;
       if (_emailController.text.isEmpty) _emailController.text = p.email;
       if (_phoneController.text.isEmpty) _phoneController.text = p.phone;
@@ -95,24 +94,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Center(
                     child: Stack(
                       children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.white,
-                          backgroundImage: NetworkImage(
-                            "https://ui-avatars.com/api/?name=${vm.profile?.name ?? 'User'}&background=random&size=128",
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xFF2563EB),
+                              width: 3,
+                            ),
                           ),
-                        ),
-                        // Nút sửa ảnh (Tạm ẩn vì chưa có API upload ảnh)
-                        /*
-                        Positioned(
-                          bottom: 0, right: 0,
                           child: CircleAvatar(
-                            radius: 16,
-                            backgroundColor: const Color(0xFF2563EB),
-                            child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                            radius: 50,
+                            backgroundColor: Colors.white,
+                            // Logic: Nếu có avatarUrl thì hiện, không thì hiện avatar chữ cái
+                            backgroundImage:
+                                (vm.profile?.avatarUrl != null &&
+                                    vm.profile!.avatarUrl!.isNotEmpty)
+                                ? NetworkImage(vm.profile!.avatarUrl!)
+                                : NetworkImage(
+                                    "https://ui-avatars.com/api/?name=${vm.profile?.name ?? 'User'}&background=random&size=128",
+                                  ),
                           ),
                         ),
-                        */
+                        // Nút Camera
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: vm.isLoading
+                                ? null
+                                : () async {
+                                    // GỌI HÀM UPLOAD
+                                    bool success = await vm.uploadAvatar();
+                                    if (success && context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Đổi ảnh đại diện thành công!",
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: const Color(0xFF2563EB),
+                              child: vm.isLoading
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

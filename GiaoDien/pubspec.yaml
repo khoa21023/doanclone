@@ -11,11 +11,12 @@ dependencies:
     sdk: flutter
   intl: ^0.20.2
   provider: ^6.1.5
-  image_picker: ^1.0.7
+  image_picker: ^1.2.1
   http: ^1.6.0
   shared_preferences: ^2.5.4
   url_launcher: ^6.3.2
   app_links: ^6.4.1
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

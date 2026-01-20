@@ -248,9 +248,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               const SizedBox(height: 8),
                               Text(
                                 // Nếu description null thì hiện text mặc định
-                                (displayProduct.description != null &&
-                                        displayProduct.description!.isNotEmpty)
-                                    ? displayProduct.description!
+                                (displayProduct.description.isNotEmpty)
+                                    ? displayProduct.description
                                     : "Sản phẩm chính hãng chất lượng cao. Tình trạng: $condition. Màu sắc: $color. Bảo hành 12 tháng tại Mobile Tech CT.",
                                 style: TextStyle(
                                   color: Colors.grey.shade700,

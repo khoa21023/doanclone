@@ -26,15 +26,32 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // --- LOGIC XỬ LÝ ẢNH THÔNG MINH ---
+    String rawImage = json['HinhAnh'] ?? '';
+    String finalUrl;
+
+    if (rawImage.startsWith('http')) {
+      // TRƯỜNG HỢP 1: Đã là link Cloudinary hoặc link online -> Dùng luôn
+      finalUrl = rawImage;
+    } else if (rawImage.isNotEmpty) {
+      // TRƯỜNG HỢP 2: Là tên file cũ (vd: ap2.jpg)
+      // Vì server Render không còn giữ file ảnh local, ta dùng ảnh mẫu tạm thời
+      // để App hiển thị đẹp mắt thay vì lỗi gạch chéo.
+      // Bạn có thể update DB sau để thay thế ảnh này.
+      finalUrl =
+          'https://via.placeholder.com/300?text=${Uri.encodeComponent(json['TenSanPham'] ?? 'Product')}';
+    } else {
+      // TRƯỜNG HỢP 3: Không có dữ liệu ảnh
+      finalUrl = 'https://via.placeholder.com/300?text=No+Image';
+    }
+    // ------------------------------------
+
     return Product(
       id: json['Id'].toString(),
       name: json['TenSanPham'] ?? 'Sản phẩm',
       sellPrice: double.tryParse(json['GiaBan'].toString()) ?? 0.0,
       originalPrice: double.tryParse(json['GiaGoc'].toString()) ?? 0.0,
-      imageUrl: json['HinhAnh'] != null
-          ? 'https://mobile-tech-ct.onrender.com/uploads/${json['HinhAnh']}'
-          : 'https://via.placeholder.com/150',
-
+      imageUrl: finalUrl,
       color: json['MauSac'] ?? '',
       storage: json['DungLuong'] ?? '',
       categoryId: json['DanhMucId']?.toString() ?? '',

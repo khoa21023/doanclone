@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../data/models/user_profile.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   UserProfile? _profile; // Có thể null khi chưa tải xong
@@ -48,7 +50,6 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      // Giả sử API lấy thông tin user hiện tại là /api/users/profile
       final url = Uri.parse(
         'https://mobile-tech-ct.onrender.com/api/users/profile',
       );
@@ -157,6 +158,65 @@ class ProfileViewModel extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = "Lỗi: $e";
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 4. UPLOAD AVATAR
+  Future<bool> uploadAvatar() async {
+    try {
+      // a. Chọn ảnh từ thư viện
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50,
+        maxWidth: 800,
+      );
+
+      if (image == null) return false; // Người dùng không chọn gì
+
+      _isLoading = true;
+      notifyListeners();
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      // b. Gọi API
+      final url = Uri.parse(
+        'https://mobile-tech-ct.onrender.com/api/users/avatar',
+      );
+
+      // Tạo Multipart Request
+      var request = http.MultipartRequest('POST', url);
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // 'avatar' là key mà backend đang hứng: uploadCloud.single('avatar')
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'avatar',
+          image.path,
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      );
+
+      // c. Gửi đi
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        // Upload xong -> Gọi lại fetchProfile để lấy link ảnh mới về hiển thị
+        await fetchProfile();
+        return true;
+      } else {
+        _errorMessage = data['message'] ?? "Lỗi upload ảnh";
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = "Lỗi kết nối: $e";
       return false;
     } finally {
       _isLoading = false;
